@@ -1,21 +1,16 @@
 import { LogEntry } from "_/model/LogEntry";
 
+
 export function extractLogEntryFromRawText(data: string): LogEntry {
-  let route = '';
-  let text = '';
-  let object = '';
+  const pattern = /\[(?<time>.+)\]\s+LOG\s+(?<route>(\w|\s|\>)+)-\>(?<message>[^|]+)\|(?<object>.+)$/gm
+  const match = pattern.exec(data.trim())
 
-  let t = data.split('->');
-  [route] = t;
-
-  t = t[1].split('|');
-  [text, object] = t;
 
   return {
     id: Math.random().toString(),
-    route,
-    text,
-    object,
-    debugUnparsed: data,
+    time: match?.groups!["time"] || "",
+    route: match?.groups!["route"] ? match?.groups!["route"].split(">").map(p => p.trim()) : [],
+    message: match?.groups!["message"] || "",
+    object: match?.groups!["object"] ? JSON.parse(match?.groups!["object"]) : {}
   };
 }

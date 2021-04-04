@@ -1,7 +1,7 @@
 export interface LogEntry {
     id: string,
-    route: string
-    text: string
-    object: string
-    debugUnparsed: string
-  }
+    time: string,
+    route: string[]
+    message: string
+    object: any
+}

@@ -18,6 +18,7 @@ import ActivityBadge from './components/ActivityBadge';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import _ from 'lodash';
 
 const MENU_BAR_HEIGHT = 50
 
@@ -26,11 +27,13 @@ function App() {
   const [isProcessActive, setIsProcessActive] = React.useState(false)
   const [selectedEntry, setSelectedEntry] = React.useState<LogEntry>()
 
+  const [routes, setRoutes] = React.useState<string[][]>([])
+
   function handleRestart() {
     setLogEntries([])
     toast("App launched", {
-      style:{
-        backgroundColor:"gray",
+      style: {
+        backgroundColor: "gray",
         color: "black"
       },
       position: 'bottom-right'
@@ -46,6 +49,7 @@ function App() {
     process.stdout.on('data', (databuffer: Buffer) => {
       const lines = databuffer.toString().split('\n');
       const logentries: LogEntry[] = [];
+      const newRoutes: string[][] = []
 
       for (const l of lines) {
         if (l.length == 0)
@@ -56,11 +60,17 @@ function App() {
           continue
         }
         const entry = extractLogEntryFromRawText(l.toString())
-        
+
+        const explored = routes.find(p => _.isEqual(p, entry.route))
+        if (!explored) {
+          newRoutes.push(entry.route)
+        }
+
         logentries.push(entry);
       }
 
       setLogEntries((oldlogentries) => [...oldlogentries, ...logentries]);
+      setRoutes([...routes, ...newRoutes])
     });
 
     process.stderr.on('data', (data: Buffer) => {
@@ -75,13 +85,14 @@ function App() {
   return (
     <Container>
       <LeftSideBar>
-        <TreeFilter />
+        <TreeFilter routes={routes} />
       </LeftSideBar>
       <Content>
         <MenuBar>
           <button onClick={startListening}>Run</button>
           <ActivityBadge isActive={isProcessActive} />
         </MenuBar>
+        {routes.length}
         <div style={{ height: `calc(100% - ${MENU_BAR_HEIGHT}px - 1px)` }}>
           <LogEntryList onSelect={setSelectedEntry} entries={logEntries} />
         </div>
@@ -89,7 +100,7 @@ function App() {
       <RightSideBar>
         <LogEntryDetails entry={selectedEntry} />
       </RightSideBar>
-      <ToastContainer/>
+      <ToastContainer />
     </Container>
   );
 }
@@ -98,6 +109,7 @@ const Container = styled.div`
   flex-direction:row;
   display: flex;
   height: 100%;
+  background-color:#242424
 `
 
 const LeftSideBar = styled.div`

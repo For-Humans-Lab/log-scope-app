@@ -16,11 +16,25 @@ import LogEntryDetails from './LogEntryDetails/LogEntryDetails';
 import TreeFilter from './TreeFilter/TreeFilter';
 import ActivityBadge from './components/ActivityBadge';
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const MENU_BAR_HEIGHT = 50
 
 function App() {
   const [logEntries, setLogEntries] = React.useState<LogEntry[]>([]);
   const [isProcessActive, setIsProcessActive] = React.useState(false)
+
+  function handleRestart() {
+    setLogEntries([])
+    toast("App launched", {
+      style:{
+        backgroundColor:"gray",
+        color: "black"
+      }
+    })
+  }
+
   function startListening() {
     const process = spawn('./emulate_realtime_stdout.sh',
       ['log_tin_example', '10']);
@@ -31,12 +45,16 @@ function App() {
       const lines = databuffer.toString().split('\n');
       const logentries: LogEntry[] = [];
 
-      for (const i in lines) {
-        if (lines[i].length == 0) continue;
+      for (const l of lines) {
+        if (l.length == 0)
+          continue;
 
-        const data = lines[i];
+        if (l.includes("BUNDLE")) {
+          handleRestart()
+          continue
+        }
 
-        logentries.push(extractLogEntryFromRawText(data.toString()));
+        logentries.push(extractLogEntryFromRawText(l.toString()));
       }
 
       setLogEntries((oldlogentries) => [...oldlogentries, ...logentries]);
@@ -68,6 +86,7 @@ function App() {
       <RightSideBar>
         <LogEntryDetails />
       </RightSideBar>
+      <ToastContainer/>
     </Container>
   );
 }

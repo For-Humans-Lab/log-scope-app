@@ -1,4 +1,4 @@
-Services > TInternalBus > Received -> event ok with id 1 and extra 0.7910012443511522 | {}
-Message bus > Publishing TInternalResponse with descriptor <0.7910012443511522> -> | {}
-Message bus > Querying for TInternalRequest > TInternalResponse -> | {}
-Message bus > Publishing TInternalRequest with descriptor <0.2796663474200287> -> | {}
+[Sun Apr 04 2021 20:51:30.302]  LOG      Services > TInternalBus > Received -> event ok with id 1 and extra 0.7910012443511522 | {}
+[Sun Apr 04 2021 20:51:30.302]  LOG      Message bus > Publishing TInternalResponse with descriptor <0.7910012443511522> -> | {}
+[Sun Apr 04 2021 20:51:30.302]  LOG      Message bus > Querying for TInternalRequest > TInternalResponse -> | {}
+[Sun Apr 04 2021 20:51:30.302]  LOG      Message bus > Publishing TInternalRequest with descriptor <0.2796663474200287> -> | {}

@@ -1,14 +1,6 @@
-if [ -z "$1" ]
-  then
-    echo "Usage: $0 FILENAME [SECONDS]"
-    exit
-fi
-
-seconds=$2
-if [ -z "$2" ]
-  then
-      seconds=1
-fi
-
+echo "[Sun Apr 04 2021 20:51:24.732]  BUNDLE  ./index.js "
+sleep 1
 cat $1
-sleep $seconds
+sleep 2
+echo "[Sun Apr 04 2021 20:51:24.732]  BUNDLE  ./index.js "
+sleep 2

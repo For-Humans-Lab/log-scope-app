@@ -3,8 +3,7 @@ import styled from 'styled-components'
 import { LogEntry } from "_/model/LogEntry";
 import LogEntryItem from "../components/LogEntry";
 
-export default function LogEntryList({ entries }: { entries: LogEntry[] }) {
-
+export default function LogEntryList( {entries}: { entries: LogEntry[] }) {
     return (
         <Container>
             {entries.map((x) => <LogEntryItem key={x.id} entry={x} />)}
@@ -13,8 +12,9 @@ export default function LogEntryList({ entries }: { entries: LogEntry[] }) {
 }
 
 const Container = styled.div`
-    background-color: red;
     height:100%;
     width:100%;
+    display: flex;
+    flex-direction:column;
     overflow-y:scroll;
 `

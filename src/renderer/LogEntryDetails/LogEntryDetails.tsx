@@ -6,7 +6,6 @@ export default function LogEntryDetails(){
 }
 
 const Container = styled.div`
-    background-color: blue;
     height:100%;
     width:100%;
 `

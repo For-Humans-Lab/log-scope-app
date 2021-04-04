@@ -53,8 +53,9 @@ function App() {
           handleRestart()
           continue
         }
-
-        logentries.push(extractLogEntryFromRawText(l.toString()));
+        const entry = extractLogEntryFromRawText(l.toString())
+        console.log(entry)
+        logentries.push(entry);
       }
 
       setLogEntries((oldlogentries) => [...oldlogentries, ...logentries]);
@@ -79,7 +80,7 @@ function App() {
           <button onClick={startListening}>Run</button>
           <ActivityBadge isActive={isProcessActive} />
         </MenuBar>
-        <div style={{ height: `calc(100% - ${MENU_BAR_HEIGHT}px)` }}>
+        <div style={{ height: `calc(100% - ${MENU_BAR_HEIGHT}px - 1px)` }}>
           <LogEntryList entries={logEntries} />
         </div>
       </Content>
@@ -99,20 +100,23 @@ const Container = styled.div`
 
 const LeftSideBar = styled.div`
   width:300px;
+  border-right: 1px solid gray
 `
 
 const Content = styled.div`
+  background-color: #3f3f3f;
   flex:1;
 `
 
 const RightSideBar = styled.div`
   width:300px;
+  border-left: 1px solid gray
 `
 
 const MenuBar = styled.div`
   height: ${MENU_BAR_HEIGHT}px;
-  background-color: #3d3d3d;
   flex-direction: row;
+  border-bottom:1px solid gray;
   display: flex;
 `
 

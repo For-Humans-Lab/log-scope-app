@@ -6,7 +6,6 @@ export default function TreeFilter(){
 }
 
 const Container = styled.div`
-    background-color: orange;
     height:100%;
     width:100%;
 `

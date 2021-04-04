@@ -1,6 +1,6 @@
 import { LogEntry } from "_/model/LogEntry";
 
-export function parseDataLine(data: string): LogEntry {
+export function extractLogEntryFromRawText(data: string): LogEntry {
   let route = '';
   let text = '';
   let object = '';

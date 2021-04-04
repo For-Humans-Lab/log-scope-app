@@ -16,10 +16,10 @@ function createWindow(): void {
     autoHideMenuBar: true,
     webPreferences: {
       webSecurity: false,
-      nodeIntegration:true,
-      contextIsolation:false,
+      nodeIntegration: true,
+      contextIsolation: false,
       devTools: process.env.NODE_ENV !== 'production',
-    }, 
+    },
   });
 
   // and load the index.html of the app.

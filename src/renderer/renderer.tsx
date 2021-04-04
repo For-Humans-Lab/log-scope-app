@@ -19,6 +19,7 @@ import ActivityBadge from './components/ActivityBadge';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import isRoutesEqual from '_/utils/isRoutesEqual';
+import isRouteIsSubset from '_/utils/isRouteIsSubset';
 
 const MENU_BAR_HEIGHT = 50
 
@@ -88,7 +89,7 @@ function App() {
     console.log('render', selectedRoutes)
     return logEntries.filter(e => {
       for (const r of selectedRoutes) {
-        if (isRoutesEqual(e.route, r))
+        if (isRouteIsSubset(r, e.route))
           return true
       }
       return false

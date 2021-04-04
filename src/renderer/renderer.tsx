@@ -14,16 +14,18 @@ import { extractLogEntryFromRawText } from '_/utils/extractLogEntryFromRawText';
 import LogEntryList from './LogEntriesList/LogEntriesList';
 import LogEntryDetails from './LogEntryDetails/LogEntryDetails';
 import TreeFilter from './TreeFilter/TreeFilter';
+import ActivityBadge from './components/ActivityBadge';
 
-const MENU_BAR_HEIGHT=50
+const MENU_BAR_HEIGHT = 50
 
 function App() {
   const [logEntries, setLogEntries] = React.useState<LogEntry[]>([]);
- x
-
+  const [isProcessActive, setIsProcessActive] = React.useState(false)
   function startListening() {
     const process = spawn('./emulate_realtime_stdout.sh',
       ['log_tin_example', '10']);
+
+    setIsProcessActive(true)
 
     process.stdout.on('data', (databuffer: Buffer) => {
       const lines = databuffer.toString().split('\n');
@@ -41,11 +43,11 @@ function App() {
     });
 
     process.stderr.on('data', (data: Buffer) => {
-      console.error(`stderr: ${data}`);
+      console.log(`stderr: ${data}`);
     });
 
     process.on('close', (_code: number) => {
-      setLogEntries([]);
+      setIsProcessActive(false)
     });
   }
 
@@ -57,8 +59,9 @@ function App() {
       <Content>
         <MenuBar>
           <button onClick={startListening}>Run</button>
+          <ActivityBadge isActive={isProcessActive} />
         </MenuBar>
-        <div style={{height:`calc(100% - ${MENU_BAR_HEIGHT}px)`}}>
+        <div style={{ height: `calc(100% - ${MENU_BAR_HEIGHT}px)` }}>
           <LogEntryList entries={logEntries} />
         </div>
       </Content>
@@ -90,6 +93,8 @@ const RightSideBar = styled.div`
 const MenuBar = styled.div`
   height: ${MENU_BAR_HEIGHT}px;
   background-color: #3d3d3d;
+  flex-direction: row;
+  display: flex;
 `
 
 ReactDOM.render(<App />,

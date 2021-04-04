@@ -1,9 +1,4 @@
-export interface LogEntry {
-  route: string
-  text: string
-  object: string
-  debugUnparsed: string
-}
+import { LogEntry } from "_/model/LogEntry";
 
 export function parseDataLine(data: string): LogEntry {
   let route = '';
@@ -17,6 +12,10 @@ export function parseDataLine(data: string): LogEntry {
   [text, object] = t;
 
   return {
-    route, text, object, debugUnparsed: data,
+    id: Math.random().toString(),
+    route,
+    text,
+    object,
+    debugUnparsed: data,
   };
 }

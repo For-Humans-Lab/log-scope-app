@@ -7,35 +7,10 @@ import '_public/style.css';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-import { LogEntry, parseDataLine } from '_utils/parser';
+import { parseDataLine } from '_utils/parser';
 import { spawn } from 'child_process';
-
-function showLogEntry(logentry: LogEntry) {
-  return (
-    <div>
-      <div>
-        unparsed:
-        {' '}
-        {logentry.debugUnparsed}
-      </div>
-      <div>
-        route:
-        {' '}
-        {logentry.route}
-      </div>
-      <div>
-        text:
-        {' '}
-        {logentry.text}
-      </div>
-      <div>
-        object:
-        {' '}
-        {logentry.object}
-      </div>
-    </div>
-  );
-}
+import { LogEntry } from '_/model/LogEntry';
+import LogEntryItem from './components/LogEntry';
 
 function showLogEntries(logentries: LogEntry[]) {
   if (logentries.length == 0) return (<div>Program not running</div>);
@@ -43,12 +18,7 @@ function showLogEntries(logentries: LogEntry[]) {
     <div>
       Logs:
       <div>
-        {logentries.map((x) => (
-          <>
-            {showLogEntry(x)}
-            <br />
-          </>
-        ))}
+        {logentries.map((x) => <LogEntryItem key={x.id} entry={x} />)}
       </div>
     </div>
   );

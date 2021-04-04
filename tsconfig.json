@@ -17,6 +17,7 @@
     "noImplicitThis": true,
     "strictNullChecks": true,
     "sourceMap": true,
+    "lib": ["dom", "esnext"],
     "target": "esnext"
   },
   "exclude": ["node_modules"]

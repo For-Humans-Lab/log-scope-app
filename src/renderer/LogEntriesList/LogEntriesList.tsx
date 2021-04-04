@@ -3,10 +3,10 @@ import styled from 'styled-components'
 import { LogEntry } from "_/model/LogEntry";
 import LogEntryItem from "../components/LogEntry";
 
-export default function LogEntryList( {entries}: { entries: LogEntry[] }) {
+export default function LogEntryList({ entries, onSelect }: { entries: LogEntry[], onSelect: (e: LogEntry) => void }) {
     return (
         <Container>
-            {entries.map((x) => <LogEntryItem key={x.id} entry={x} />)}
+            {entries.map((x) => <LogEntryItem onSelect={() => onSelect(x)} key={x.id} entry={x} />)}
         </Container>
     )
 }

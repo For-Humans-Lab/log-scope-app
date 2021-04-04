@@ -24,6 +24,7 @@ const MENU_BAR_HEIGHT = 50
 function App() {
   const [logEntries, setLogEntries] = React.useState<LogEntry[]>([]);
   const [isProcessActive, setIsProcessActive] = React.useState(false)
+  const [selectedEntry, setSelectedEntry] = React.useState<LogEntry>()
 
   function handleRestart() {
     setLogEntries([])
@@ -54,7 +55,7 @@ function App() {
           continue
         }
         const entry = extractLogEntryFromRawText(l.toString())
-        console.log(entry)
+        
         logentries.push(entry);
       }
 
@@ -81,11 +82,11 @@ function App() {
           <ActivityBadge isActive={isProcessActive} />
         </MenuBar>
         <div style={{ height: `calc(100% - ${MENU_BAR_HEIGHT}px - 1px)` }}>
-          <LogEntryList entries={logEntries} />
+          <LogEntryList onSelect={setSelectedEntry} entries={logEntries} />
         </div>
       </Content>
       <RightSideBar>
-        <LogEntryDetails />
+        <LogEntryDetails entry={selectedEntry} />
       </RightSideBar>
       <ToastContainer/>
     </Container>

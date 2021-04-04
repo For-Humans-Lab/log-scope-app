@@ -7,7 +7,7 @@ export default function LogEntryItem({ entry, onSelect }: { entry: LogEntry, onS
     return (
         <Container style={{cursor:"pointer"}} onClick={onSelect}>
             <DataBlock>
-                {entry.text}
+                {entry.message}
                 <div style={{ flex: 1 }} />
                 {Object.keys(entry.object).length != 0 ? <DataChip >DATA</DataChip> : null}
             </DataBlock>

@@ -10,7 +10,7 @@ export function extractLogEntryFromRawText(data: string): LogEntry {
     id: Math.random().toString(),
     time: match?.groups!["time"] || "",
     route: match?.groups!["route"] ? match?.groups!["route"].split(">").map(p => p.trim()) : [],
-    text: match?.groups!["message"] || "",
+    message: match?.groups!["message"] || "",
     object: match?.groups!["object"] ? JSON.parse(match?.groups!["object"]) : {}
   };
 }

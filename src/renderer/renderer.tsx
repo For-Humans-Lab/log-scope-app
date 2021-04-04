@@ -32,7 +32,8 @@ function App() {
       style:{
         backgroundColor:"gray",
         color: "black"
-      }
+      },
+      position: 'bottom-right'
     })
   }
 

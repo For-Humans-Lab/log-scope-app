@@ -13,6 +13,7 @@ function createWindow(): void {
   mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
+    autoHideMenuBar: true,
     webPreferences: {
       webSecurity: false,
       nodeIntegration:true,

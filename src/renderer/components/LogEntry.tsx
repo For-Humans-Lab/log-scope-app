@@ -1,14 +1,20 @@
 import * as React from "react";
 import { LogEntry } from "_/model/LogEntry";
 import styled from 'styled-components'
+import _ from "lodash";
 
 export default function LogEntryItem({ entry, onSelect }: { entry: LogEntry, onSelect: () => void }) {
     return (
-        <Container onClick={onSelect}>
-            {entry.text}
+        <Container style={{cursor:"pointer"}} onClick={onSelect}>
+            <DataBlock>
+                {entry.text}
+                <div style={{ flex: 1 }} />
+                {Object.keys(entry.object).length != 0 ? <DataChip >DATA</DataChip> : null}
+            </DataBlock>
+
             <MetaBar>
                 <RouteHint>
-                    {entry.route}
+                    {entry.route.join(" > ")}
                 </RouteHint>
                 <div style={{ flex: 1 }} />
                 <TimeHint>
@@ -18,6 +24,14 @@ export default function LogEntryItem({ entry, onSelect }: { entry: LogEntry, onS
         </Container>
     );
 }
+
+const DataChip = styled.span`
+    border-radius:8px;
+    border:1px solid white;
+    padding:4px;
+    background-color:#444444;
+    font-size:8px;
+`
 
 const Container = styled.div`
     background-color: #252525;
@@ -43,4 +57,9 @@ const RouteHint = styled.div`
 
 const TimeHint = styled.div`
    
+`
+
+const DataBlock = styled.div`
+    display:flex;
+    flex-direction:row;
 `

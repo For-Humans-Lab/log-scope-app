@@ -9,9 +9,8 @@ export function extractLogEntryFromRawText(data: string): LogEntry {
   return {
     id: Math.random().toString(),
     time: match?.groups!["time"] || "",
-    route: match?.groups!["route"] || "",
+    route: match?.groups!["route"] ? match?.groups!["route"].split(">").map(p => p.trim()) : [],
     text: match?.groups!["message"] || "",
-    object: match?.groups!["object"] || "",
-    debugUnparsed: data,
+    object: match?.groups!["object"] ? JSON.parse(match?.groups!["object"]) : {}
   };
 }

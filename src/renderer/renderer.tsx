@@ -9,46 +9,64 @@ import * as ReactDOM from 'react-dom';
 
 import { spawn } from 'child_process';
 
-interface DataLine {
-    linenumber: number,
-    data: string
-}
+import { LogEntry, parseDataLine } from '_utils/parser'
 
-function showOut(out: DataLine[]) {
-    if (out.length == 0)
+function showLogEntries(logentries: LogEntry[]) {
+    if (logentries.length == 0)
         return (<div>Program not running</div>)
     else
         return (
             <div>
-                Program out:
+                Logs:
                 <div>
-                    {out.map(p => <><b>{p.linenumber}</b>. <div>{p.data}</div> </>)}
+                    {logentries.map(x => <>
+                        {showLogEntry(x)}
+                        <br></br>
+                    </>)}
                 </div>
             </div>
         )
 }
 
+function showLogEntry(logentry: LogEntry) {
+    return (
+        <div>
+            <div>
+                unparsed: {logentry.debug_unparsed}
+            </div>
+            <div>
+                route: {logentry.route}
+            </div>
+            <div>
+                text: {logentry.text}
+            </div>
+            <div>
+                object: {logentry.object}
+            </div>
+        </div>
+    )
+}
+
 function App() {
-    const [out, setOut] = React.useState<DataLine[]>([])
+    const [logentries, setLogEntries] = React.useState<LogEntry[]>([])
 
     function run() {
-        var linenumber: number = 0
-
         const process = spawn('./emulate_realtime_stdout.sh', ['log_tin_example', '10'])
 
-        process.stdout.on('data', (data: Buffer) => {
-            var lines = data.toString().split('\n')
-            var datalines: DataLine[] = []
+        process.stdout.on('data', (databuffer: Buffer) => {
+            var lines = databuffer.toString().split('\n')
+            var logentries: LogEntry[] = []
+
             for (var i in lines) {
                 if (lines[i].length == 0)
                     continue
 
-                linenumber++
-                datalines.push({ linenumber, data: lines[i] })
+                var data = lines[i]
+
+                logentries.push(parseDataLine(data.toString()))
             }
 
-            setOut((oldout) => [...oldout, ...datalines])
-            // console.log(data.toString().split('\n'))
+            setLogEntries((oldlogentries) => [...oldlogentries, ...logentries])
         });
 
         process.stderr.on('data', (data: Buffer) => {
@@ -56,14 +74,14 @@ function App() {
         });
 
         process.on('close', (_code: any) => {
-            setOut([])
+            setLogEntries([])
         });
     }
 
     return (
         <div>
             <div><button onClick={run}>Run</button></div>
-            {showOut(out)}
+            {showLogEntries(logentries)}
         </div>
     )
 }

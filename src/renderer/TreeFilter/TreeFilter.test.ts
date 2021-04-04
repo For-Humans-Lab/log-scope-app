@@ -31,7 +31,7 @@ describe('Tree tests', () => {
             }
         ]
 
-        expect(genTreeFromRoutes(routes, [])).toStrictEqual(rightTree)
+        expect(genTreeFromRoutes(routes, [], [])).toStrictEqual(rightTree)
     });
 
     it('should check right routes', () => {
@@ -66,6 +66,6 @@ describe('Tree tests', () => {
             }
         ]
 
-        expect(genTreeFromRoutes(routes, selections)).toStrictEqual(rightTree)
+        expect(genTreeFromRoutes(routes, selections, [])).toStrictEqual(rightTree)
     });
 });

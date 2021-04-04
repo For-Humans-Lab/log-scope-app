@@ -1,6 +1,6 @@
 
 
-export default function genTreeFromRoutes(routes: string[][], selected: string[][]) {
+export default function genTreeFromRoutes(routes: string[][], selected: string[][], route: string[]) {
     const leafs: any[] = [] // aka results
     const routeGroups: Map<string, string[][]> = new Map() // routes grouped by first element
     const selectionGroups: Map<string, string[][]> = new Map() // the same for selections
@@ -27,12 +27,14 @@ export default function genTreeFromRoutes(routes: string[][], selected: string[]
 
     for (let gName of routeGroups.keys()) { // for every root
         const next = routeGroups.get(gName)!
-        const children = genTreeFromRoutes(next, selectionGroups.get(gName)!) // recursively find leafs
+        const cRoute = [...route, gName]
+        const children = genTreeFromRoutes(next, selectionGroups.get(gName)!, cRoute) // recursively find leafs
         leafs.push({
             name: gName,
             children,
             isExpanded: !!children.length,
-            isChecked: isGroupChecks.get(gName)
+            isChecked: isGroupChecks.get(gName),
+            route: cRoute
         })
     }
 

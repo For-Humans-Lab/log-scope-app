@@ -18,9 +18,10 @@ import ActivityBadge from './components/ActivityBadge';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import _ from 'lodash';
+import isRoutesEqual from '_/utils/isRoutesEqual';
 
 const MENU_BAR_HEIGHT = 50
+
 
 function App() {
   const [logEntries, setLogEntries] = React.useState<LogEntry[]>([]);
@@ -28,6 +29,7 @@ function App() {
   const [selectedEntry, setSelectedEntry] = React.useState<LogEntry>()
 
   const [routes, setRoutes] = React.useState<string[][]>([])
+  const [selectedRoutes, setSelectedRoutes] = React.useState<string[][]>([])
 
   function handleRestart() {
     setLogEntries([])
@@ -61,7 +63,7 @@ function App() {
         }
         const entry = extractLogEntryFromRawText(l.toString())
 
-        const explored = routes.find(p => _.isEqual(p, entry.route))
+        const explored = routes.find(p => isRoutesEqual(p, entry.route))
         if (!explored) {
           newRoutes.push(entry.route)
         }
@@ -70,7 +72,7 @@ function App() {
       }
 
       setLogEntries((oldlogentries) => [...oldlogentries, ...logentries]);
-      setRoutes([...routes, ...newRoutes])
+      setRoutes(rts=>[...rts, ...newRoutes])
     });
 
     process.stderr.on('data', (data: Buffer) => {
@@ -82,19 +84,32 @@ function App() {
     });
   }
 
+  function getActiveEntries() {
+    console.log('render', selectedRoutes)
+    return logEntries.filter(e => {
+      for (const r of selectedRoutes) {
+        if (isRoutesEqual(e.route, r))
+          return true
+      }
+      return false
+    })
+  }
+
   return (
     <Container>
       <LeftSideBar>
-        <TreeFilter routes={routes} />
+        <TreeFilter onSelectedChange={(routes) => setSelectedRoutes(routes)} routes={routes} />
       </LeftSideBar>
       <Content>
         <MenuBar>
           <button onClick={startListening}>Run</button>
           <ActivityBadge isActive={isProcessActive} />
         </MenuBar>
-        {routes.length}
+        {JSON.stringify(routes)}
         <div style={{ height: `calc(100% - ${MENU_BAR_HEIGHT}px - 1px)` }}>
-          <LogEntryList onSelect={setSelectedEntry} entries={logEntries} />
+          <LogEntryList
+            onSelect={setSelectedEntry}
+            entries={getActiveEntries()} />
         </div>
       </Content>
       <RightSideBar>

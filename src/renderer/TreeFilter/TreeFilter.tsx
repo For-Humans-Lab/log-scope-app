@@ -5,14 +5,19 @@ import SuperTreeview from 'react-super-treeview';
 
 import 'react-super-treeview/dist/style.css'
 import genTreeFromRoutes from "./genTreeFromRoutes";
+import _ from "lodash";
+import isRoutesEqual from "_/utils/isRoutesEqual";
 
 
-export default function TreeFilter({ routes }: { routes: string[][] }) {
+export default function TreeFilter({ routes, onSelectedChange }: {
+    routes: string[][],
+    onSelectedChange: (routes: string[][]) => void
+}) {
     const [tree, setTree] = React.useState<any>([])
     const [selectedRoutes, setSelectedRoutes] = React.useState<string[][]>([])
 
     React.useEffect(() => {
-        setTree(genTreeFromRoutes(routes, selectedRoutes))
+        setTree(genTreeFromRoutes(routes, selectedRoutes, []))
     }, [routes])
 
     return (
@@ -25,9 +30,27 @@ export default function TreeFilter({ routes }: { routes: string[][] }) {
                 onUpdateCb={(updatedData: any) => {
                     setTree(updatedData)
                 }}
+                onCheckToggleCb={(nodes: any, depth: any) => {
+                    const node = nodes[0]
+                    const isChecked = node.isChecked as boolean
+                    console.log(node)
+                    const route = node.route as string[]
+                    if (isChecked) {
+                        const nR = [...selectedRoutes, route]
+                        setSelectedRoutes(nR)
+                        onSelectedChange(nR)
+                    }
+                    else {
+                        const nR =selectedRoutes.filter(r => !(isRoutesEqual(r, route)))
+                        setSelectedRoutes(nR)
+                        onSelectedChange(nR)
+                    }
+                    
+                }}
                 isDeletable={() => false}
                 isExpandable={() => false}
             />
+
         </Container>
     )
 }

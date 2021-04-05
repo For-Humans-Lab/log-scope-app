@@ -5,9 +5,12 @@ import _ from "lodash";
 
 export default function LogEntryItem({ entry, onSelect }: { entry: LogEntry, onSelect: () => void }) {
     return (
-        <Container style={{cursor:"pointer"}} onClick={onSelect}>
+        <Container style={{ cursor: "pointer" }} onClick={onSelect}>
             <DataBlock>
-                {entry.message}
+                <Message>
+                    {entry.message}
+                </Message>
+
                 <div style={{ flex: 1 }} />
                 {Object.keys(entry.object).length != 0 ? <DataChip >DATA</DataChip> : null}
             </DataBlock>
@@ -25,28 +28,35 @@ export default function LogEntryItem({ entry, onSelect }: { entry: LogEntry, onS
     );
 }
 
+const Message = styled.span`
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+`
+
 const DataChip = styled.span`
     border-radius:8px;
     border:1px solid white;
     padding:4px;
+    
     background-color:#444444;
     font-size:8px;
 `
 
 const Container = styled.div`
-    background-color: #313131;
+    background-color: #363636;
     padding:8px;
+    margin:4px;
+    margin-bottom:0;
+    border-radius:8px;
     padding-bottom:2px;
     font-size:14px;
     color: white;
     font-family: Arial;
-    margin-bottom:8px;
   `
 
 const MetaBar = styled.div`
   font-size: 10px;
   color: gray;
-  margin-top:4px;
+  padding-top:4px;
   display:flex;
   flex-direction:row;
 `

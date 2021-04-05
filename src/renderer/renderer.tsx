@@ -47,16 +47,16 @@ function App() {
     })
   }
 
-  function logRaw(...lines:string[]){
-    setRaw(raw=>[...lines, ...raw])
+  function logRaw(...lines: string[]) {
+    setRaw(raw => [...lines, ...raw])
   }
 
   function startListening() {
-    const process = spawn('./emulate_realtime_stdout.sh', []);
+    const server = spawn(process.env.NODE_ENV == "development" ? './emulate_realtime_stdout.sh' : "npm run start", []);
 
     setIsProcessActive(true)
 
-    process.stdout.on('data', (databuffer: Buffer) => {
+    server.stdout.on('data', (databuffer: Buffer) => {
       const lines = databuffer.toString().split('\n');
       logRaw(...lines)
 
@@ -92,7 +92,7 @@ function App() {
       setRoutes(rts => [...rts, ...newRoutes])
     });
 
-    process.stderr.on('data', (data: Buffer) => {
+    server.stderr.on('data', (data: Buffer) => {
       console.log(`stderr: ${data}`);
       toast(`Error ${data.toString()}`, {
         style: {
@@ -103,7 +103,7 @@ function App() {
       })
     });
 
-    process.on('close', (_code: number) => {
+    server.on('close', (_code: number) => {
       setIsProcessActive(false)
     });
   }
@@ -125,9 +125,9 @@ function App() {
           onSelectedChange={(routes) => setSelectedRoutes(routes)}
           selectedRoutes={selectedRoutes}
           routes={routes} />
-          <div style={{flex:1, height:"auto"}}/>
+        <div style={{ flex: 1, height: "auto" }} />
         <Log>
-          {raw.map(r => <div>{r}</div>)}
+          {raw.map(r => <div style={{marginBottom:8}}>{r}</div>)}
         </Log>
       </LeftSideBar>
       <Content>
@@ -140,7 +140,6 @@ function App() {
             onSelect={setSelectedEntry}
             entries={getActiveEntries()} />
         </div>
-
       </Content>
       <RightSideBar>
         {selectedEntry ?
@@ -188,7 +187,7 @@ const LeftSideBar = styled.div`
 `
 
 const Content = styled.div`
-  background-color: #3f3f3f;
+  background-color: #2e2e2e;
   flex:1;
 `
 
@@ -199,7 +198,7 @@ const RightSideBar = styled.div`
 const MenuBar = styled.div`
   height: ${MENU_BAR_HEIGHT}px;
   flex-direction: row;
-  border-bottom:1px solid gray;
+  background-color: #3f3f3f;
   display: flex;
 `
 

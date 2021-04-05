@@ -13,19 +13,22 @@ describe('Tree tests', () => {
             {
                 name: "A",
                 isExpanded: true,
-                isChecked:false,
+                isChecked: false,
+                route: ["A"],
                 children: [
                     {
                         name: "B",
                         children: [],
                         isExpanded: false,
-                        isChecked:false,
+                        isChecked: false,
+                        route: ["A", "B"],
                     },
                     {
                         name: "C",
                         children: [],
                         isExpanded: false,
-                        isChecked:false,
+                        isChecked: false,
+                        route: ["A", "C"],
                     }
                 ]
             }
@@ -48,19 +51,22 @@ describe('Tree tests', () => {
             {
                 name: "A",
                 isExpanded: true,
-                isChecked:true,
+                isChecked: true,
+                route: ["A"],
                 children: [
                     {
                         name: "B",
                         children: [],
                         isExpanded: false,
-                        isChecked:true,
+                        isChecked: true,
+                        route: ["A", "B"],
                     },
                     {
                         name: "C",
                         children: [],
                         isExpanded: false,
-                        isChecked:false,
+                        isChecked: false,
+                        route: ["A", "C"],
                     }
                 ]
             }

@@ -1,9 +1,10 @@
+import { Route } from "_/model/Route"
 
 
-export default function genTreeFromRoutes(routes: string[][], selected: string[][], route: string[]) {
+export default function genTreeFromRoutes(routes: Route[], selected: Route[], route: Route) {
     const leafs: any[] = [] // aka results
-    const routeGroups: Map<string, string[][]> = new Map() // routes grouped by first element
-    const selectionGroups: Map<string, string[][]> = new Map() // the same for selections
+    const routeGroups: Map<string, Route[]> = new Map() // routes grouped by first element
+    const selectionGroups: Map<string, Route[]> = new Map() // the same for selections
     const isGroupChecks: Map<string, boolean> = new Map()
 
     for (let r of routes) {

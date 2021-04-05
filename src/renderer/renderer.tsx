@@ -20,6 +20,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import isRoutesEqual from '_/utils/isRoutesEqual';
 import isRouteIsSubset from '_/utils/isRouteIsSubset';
+import { Route } from '_/model/Route';
+import unwrapRoute from '_/utils/unwrapRoute';
 
 const MENU_BAR_HEIGHT = 50
 
@@ -29,8 +31,8 @@ function App() {
   const [isProcessActive, setIsProcessActive] = React.useState(false)
   const [selectedEntry, setSelectedEntry] = React.useState<LogEntry>()
 
-  const [routes, setRoutes] = React.useState<string[][]>([])
-  const [selectedRoutes, setSelectedRoutes] = React.useState<string[][]>([])
+  const [routes, setRoutes] = React.useState<Route[]>([])
+  const [selectedRoutes, setSelectedRoutes] = React.useState<Route[]>([])
 
   function handleRestart() {
     setLogEntries([])
@@ -52,7 +54,7 @@ function App() {
     process.stdout.on('data', (databuffer: Buffer) => {
       const lines = databuffer.toString().split('\n');
       const logentries: LogEntry[] = [];
-      const newRoutes: string[][] = []
+      const newRoutes: Route[] = []
 
       for (const l of lines) {
         if (l.length == 0)
@@ -73,7 +75,13 @@ function App() {
       }
 
       setLogEntries((oldlogentries) => [...oldlogentries, ...logentries]);
-      setRoutes(rts=>[...rts, ...newRoutes])
+
+      const allVariationsOfRoutes = newRoutes.reduce((p, r) => [...p, ...unwrapRoute(r)], [] as Route[])
+      setSelectedRoutes((selected) =>
+        [...selected,
+        ...allVariationsOfRoutes.filter(r => !routes.some(kr => isRoutesEqual(r, kr)))])
+
+      setRoutes(rts => [...rts, ...newRoutes])
     });
 
     process.stderr.on('data', (data: Buffer) => {
@@ -89,7 +97,7 @@ function App() {
     console.log('render', selectedRoutes)
     return logEntries.filter(e => {
       for (const r of selectedRoutes) {
-        if (isRouteIsSubset(r, e.route))
+        if (isRouteIsSubset(e.route, r))
           return true
       }
       return false
@@ -99,14 +107,16 @@ function App() {
   return (
     <Container>
       <LeftSideBar>
-        <TreeFilter onSelectedChange={(routes) => setSelectedRoutes(routes)} routes={routes} />
+        <TreeFilter
+          onSelectedChange={(routes) => setSelectedRoutes(routes)}
+          selectedRoutes={selectedRoutes}
+          routes={routes} />
       </LeftSideBar>
       <Content>
         <MenuBar>
           <button onClick={startListening}>Run</button>
           <ActivityBadge isActive={isProcessActive} />
         </MenuBar>
-        {JSON.stringify(routes)}
         <div style={{ height: `calc(100% - ${MENU_BAR_HEIGHT}px - 1px)` }}>
           <LogEntryList
             onSelect={setSelectedEntry}
@@ -114,12 +124,29 @@ function App() {
         </div>
       </Content>
       <RightSideBar>
-        <LogEntryDetails entry={selectedEntry} />
+        {selectedEntry ?
+          <LogEntryDetails entry={selectedEntry} />
+          : (
+            <EntryDetailsHint>
+              Select one of messages
+            </EntryDetailsHint>
+          )
+        }
+
       </RightSideBar>
       <ToastContainer />
     </Container>
   );
 }
+
+const EntryDetailsHint = styled.div`
+  display:flex;
+  flex: 1;
+  height: 100%;
+  color: #a8a8a8;
+  align-items: center;
+  justify-content: center;
+`
 
 const Container = styled.div`
   flex-direction:row;
@@ -130,7 +157,6 @@ const Container = styled.div`
 
 const LeftSideBar = styled.div`
   width:300px;
-  border-right: 1px solid gray
 `
 
 const Content = styled.div`
@@ -140,7 +166,6 @@ const Content = styled.div`
 
 const RightSideBar = styled.div`
   width:300px;
-  border-left: 1px solid gray
 `
 
 const MenuBar = styled.div`

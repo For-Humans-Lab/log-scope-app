@@ -7,14 +7,15 @@ import 'react-super-treeview/dist/style.css'
 import genTreeFromRoutes from "./genTreeFromRoutes";
 import _ from "lodash";
 import isRoutesEqual from "_/utils/isRoutesEqual";
+import { Route } from "_/model/Route";
 
 
-export default function TreeFilter({ routes, onSelectedChange }: {
-    routes: string[][],
-    onSelectedChange: (routes: string[][]) => void
+export default function TreeFilter({ routes, onSelectedChange, selectedRoutes }: {
+    routes: Route[],
+    selectedRoutes: Route[],
+    onSelectedChange: (routes: Route[]) => void
 }) {
     const [tree, setTree] = React.useState<any>([])
-    const [selectedRoutes, setSelectedRoutes] = React.useState<string[][]>([])
 
     React.useEffect(() => {
         setTree(genTreeFromRoutes(routes, selectedRoutes, []))
@@ -37,12 +38,10 @@ export default function TreeFilter({ routes, onSelectedChange }: {
                     const route = node.route as string[]
                     if (isChecked) {
                         const nR = [...selectedRoutes, route]
-                        setSelectedRoutes(nR)
                         onSelectedChange(nR)
                     }
                     else {
                         const nR =selectedRoutes.filter(r => !(isRoutesEqual(r, route)))
-                        setSelectedRoutes(nR)
                         onSelectedChange(nR)
                     }
                     
@@ -57,12 +56,11 @@ export default function TreeFilter({ routes, onSelectedChange }: {
 
 const Title = styled.div`
     font-size:20px;
-    margin:8px;
+    padding:8px;
 `
 
 const Container = styled.div`
-    height:100%;
-    width:100%;
+    flex: 1;
     color:white;
     padding:8px;
 `

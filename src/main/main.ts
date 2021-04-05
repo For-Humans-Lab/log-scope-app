@@ -13,6 +13,7 @@ function createWindow(): void {
   mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
+    title:"Log scope by For Humans Lab",
     autoHideMenuBar: true,
     webPreferences: {
       webSecurity: false,

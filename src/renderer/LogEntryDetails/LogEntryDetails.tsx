@@ -29,21 +29,20 @@ export default function LogEntryDetails({ entry }: { entry: LogEntry | undefined
                 <div style={{ fontSize: 20, marginBottom: 8 }}>
                     Data
                 </div>
-               <ReactJson style={{backgroundColor:"transparent"}} theme={"summerfruit"} src={entry?.object}/>
+                <ReactJson style={{ backgroundColor: "transparent" }} theme={"summerfruit"} src={entry?.object} />
             </DataBlock>
         </Container>
     )
 }
 
 const Container = styled.div`
-    height:100%;
-    width:100%;
+    flex: 1;
     color:white;
-    padding:1Route2px;
+    padding:8px;
 `
 const RouteBlock = styled.div`
     font-size:14px;
-    margin:8px;
+    padding:8px;
 `
 
 const Route = styled.div`

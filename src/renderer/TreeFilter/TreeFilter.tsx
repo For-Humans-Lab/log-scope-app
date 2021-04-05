@@ -56,12 +56,11 @@ export default function TreeFilter({ routes, onSelectedChange, selectedRoutes }:
 
 const Title = styled.div`
     font-size:20px;
-    margin:8px;
+    padding:8px;
 `
 
 const Container = styled.div`
-    height:100%;
-    width:100%;
+    flex: 1;
     color:white;
     padding:8px;
 `

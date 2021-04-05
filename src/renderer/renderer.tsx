@@ -124,12 +124,29 @@ function App() {
         </div>
       </Content>
       <RightSideBar>
-        <LogEntryDetails entry={selectedEntry} />
+        {selectedEntry ?
+          <LogEntryDetails entry={selectedEntry} />
+          : (
+            <EntryDetailsHint>
+              Select one of messages
+            </EntryDetailsHint>
+          )
+        }
+
       </RightSideBar>
       <ToastContainer />
     </Container>
   );
 }
+
+const EntryDetailsHint = styled.div`
+  display:flex;
+  flex: 1;
+  height: 100%;
+  color: #a8a8a8;
+  align-items: center;
+  justify-content: center;
+`
 
 const Container = styled.div`
   flex-direction:row;
@@ -140,7 +157,6 @@ const Container = styled.div`
 
 const LeftSideBar = styled.div`
   width:300px;
-  border-right: 1px solid gray
 `
 
 const Content = styled.div`
@@ -150,7 +166,6 @@ const Content = styled.div`
 
 const RightSideBar = styled.div`
   width:300px;
-  border-left: 1px solid gray
 `
 
 const MenuBar = styled.div`

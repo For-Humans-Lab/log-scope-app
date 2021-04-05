@@ -34,7 +34,7 @@ const DataChip = styled.span`
 `
 
 const Container = styled.div`
-    background-color: #252525;
+    background-color: #313131;
     padding:8px;
     padding-bottom:2px;
     font-size:14px;

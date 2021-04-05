@@ -34,6 +34,8 @@ function App() {
   const [routes, setRoutes] = React.useState<Route[]>([])
   const [selectedRoutes, setSelectedRoutes] = React.useState<Route[]>([])
 
+  const [raw, setRaw] = React.useState<string[]>([])
+
   function handleRestart() {
     setLogEntries([])
     toast("App launched", {
@@ -45,14 +47,19 @@ function App() {
     })
   }
 
+  function logRaw(...lines:string[]){
+    setRaw(raw=>[...lines, ...raw])
+  }
+
   function startListening() {
-    const process = spawn('./emulate_realtime_stdout.sh',
-      ['log_tin_example', '10']);
+    const process = spawn('./emulate_realtime_stdout.sh', []);
 
     setIsProcessActive(true)
 
     process.stdout.on('data', (databuffer: Buffer) => {
       const lines = databuffer.toString().split('\n');
+      logRaw(...lines)
+
       const logentries: LogEntry[] = [];
       const newRoutes: Route[] = []
 
@@ -62,6 +69,7 @@ function App() {
 
         if (l.includes("BUNDLE")) {
           handleRestart()
+          logRaw("--- RESTART OF APPLICATION ---")
           continue
         }
         const entry = extractLogEntryFromRawText(l.toString())
@@ -86,6 +94,13 @@ function App() {
 
     process.stderr.on('data', (data: Buffer) => {
       console.log(`stderr: ${data}`);
+      toast(`Error ${data.toString()}`, {
+        style: {
+          backgroundColor: "orange",
+          color: "black"
+        },
+        position: 'bottom-right'
+      })
     });
 
     process.on('close', (_code: number) => {
@@ -94,7 +109,6 @@ function App() {
   }
 
   function getActiveEntries() {
-    console.log('render', selectedRoutes)
     return logEntries.filter(e => {
       for (const r of selectedRoutes) {
         if (isRouteIsSubset(e.route, r))
@@ -111,6 +125,10 @@ function App() {
           onSelectedChange={(routes) => setSelectedRoutes(routes)}
           selectedRoutes={selectedRoutes}
           routes={routes} />
+          <div style={{flex:1, height:"auto"}}/>
+        <Log>
+          {raw.map(r => <div>{r}</div>)}
+        </Log>
       </LeftSideBar>
       <Content>
         <MenuBar>
@@ -122,6 +140,7 @@ function App() {
             onSelect={setSelectedEntry}
             entries={getActiveEntries()} />
         </div>
+
       </Content>
       <RightSideBar>
         {selectedEntry ?
@@ -132,12 +151,19 @@ function App() {
             </EntryDetailsHint>
           )
         }
-
       </RightSideBar>
       <ToastContainer />
     </Container>
   );
 }
+
+const Log = styled.div`
+  height: 300px;
+  border-top: 1px solid #666666;
+  color: #8b8b8b;
+  padding: 4px;
+  overflow-y:scroll;
+`
 
 const EntryDetailsHint = styled.div`
   display:flex;
@@ -157,6 +183,8 @@ const Container = styled.div`
 
 const LeftSideBar = styled.div`
   width:300px;
+  display:flex;
+  flex-direction:column;
 `
 
 const Content = styled.div`

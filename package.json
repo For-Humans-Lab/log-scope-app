@@ -1,5 +1,5 @@
 {
-  "name": "electron-react-typescript-webpack-boilerplate",
+  "name": "log-scope-app",
   "version": "3.0.0",
   "description": "The software to easy log reading",
   "main": "./dist/main.bundle.js",
@@ -8,13 +8,19 @@
     "dev": "rimraf dist && cross-env NODE_ENV=development webpack --watch --progress --color",
     "prod": "rimraf dist && cross-env NODE_ENV=production webpack --progress --color",
     "test": "mocha -r ts-node/register -r tsconfig-paths/register \"test/**/*.ts\"",
-    "build:win": "mkdir build && cp package.json build && electron-builder build --win --x64",
+    "build:win": "electron-builder build --win --x64",
     "build:mac": "electron-builder build --mac --x64",
-    "build:linux": "electron-builder build --linux tar.gz"
+    "build:linux": "electron-builder build --linux"
+  },
+  "bin": {
+    "log-scope-app": "./build/linux/log-scope-app"
   },
   "build": {
-    "appId": "com.devtography.electron_boilerplate",
+    "appId": "com.forhumanslab.logscopeapp",
     "productName": "TreeLogReader",
+    "npmArgs": [
+      "--force"
+    ],
     "directories": {
       "app": "./dist/",
       "output": "./out/"
@@ -32,7 +38,7 @@
     },
     "buildVersion": "1"
   },
-  "author": "Wing Chau @Devtography",
+  "author": "For Humans Lab",
   "license": "MIT",
   "dependencies": {
     "@types/node": "^12.19.9",
@@ -93,11 +99,10 @@
     "url": "git+https://github.com/Devtography/electron-react-typescript-webpack-boilerplate"
   },
   "keywords": [
-    "boilerplate",
-    "Electron",
-    "React",
-    "Typescript",
-    "Webpack"
+    "log",
+    "react-native",
+    "log-software",
+    "log-reader"
   ],
   "bugs": {
     "url": "https://github.com/Devtography/electron-react-typescript-webpack-boilerplate/issues"

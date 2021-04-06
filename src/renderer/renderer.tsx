@@ -7,7 +7,7 @@ import '_public/style.css';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import styled from 'styled-components'
-import { ChildProcess, ChildProcessWithoutNullStreams, spawn } from 'child_process';
+import { ChildProcess, ChildProcessByStdio, ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import { LogEntry } from '_/model/LogEntry';
 import LogEntryItem from './components/LogEntry';
 import { extractLogEntryFromRawText } from '_/utils/extractLogEntryFromRawText';
@@ -23,6 +23,7 @@ import isRouteIsSubset from '_/utils/isRouteIsSubset';
 import { Route } from '_/model/Route';
 import unwrapRoute from '_/utils/unwrapRoute';
 import { toastInfo, toastWarn } from '_/utils/toasts';
+import { trimEnd } from 'lodash';
 
 const MENU_BAR_HEIGHT = 50
 
@@ -54,15 +55,22 @@ function App() {
 
   React.useEffect(() => {
     window.onbeforeunload = () => { server?.kill() }
+    if (process.env["DEV_APPLICATION"])
+      toastWarn("Started with special app " + process.env["DEV_APPLICATION"])
   }, [])
 
-  if (process.env["DEV_APPLICATION"])
-    toastWarn("Started with special app " + process.env["DEV_APPLICATION"])
+  function patchCLI(){
+    
+  }
 
   function startListening() {
+    patchCLI()
+
     const specialApp = process.env["DEV_APPLICATION"]
     if (specialApp) {
-      server = spawn(specialApp, ["start"]);
+      server = spawn(specialApp+"/node_modules/.bin/react-native", ["start"], {
+        cwd: specialApp,
+      });
     } else {
       server = spawn("npx", ["react-native", "start"]);
     }
@@ -139,9 +147,9 @@ function App() {
           selectedRoutes={selectedRoutes}
           routes={routes} />
         <div style={{ flex: 1, height: "auto" }} />
-        <Log>
-          {raw.map(r => <div style={{ marginBottom: 8 }}>{r}</div>)}
-        </Log>
+        <RawLog>
+          {raw.map(r => <RawLogEntry>{r}</RawLogEntry>)}
+        </RawLog>
       </LeftSideBar>
       <Content>
         <MenuBar>
@@ -153,9 +161,13 @@ function App() {
             }
           }}>Run</button>
           <button onClick={() => {
-            console.log(server)
-            server?.stdin.write(String.fromCharCode(18)/* ctrl + r */ + "\r\n")
+            server?.stdin.write("r\r\n")
           }}>Restart</button>
+          {isProcessActive ? <button onClick={() => {
+            server?.kill()
+            toastInfo("Server stopped manually")
+          }}>Stop server</button> : null}
+
           <ActivityBadge isActive={isProcessActive} />
         </MenuBar>
         <div style={{ height: `calc(100% - ${MENU_BAR_HEIGHT}px - 1px)` }}>
@@ -179,11 +191,18 @@ function App() {
   );
 }
 
-const Log = styled.div`
+const RawLog = styled.div`
   height: 300px;
   color: #8b8b8b;
   padding: 4px;
   overflow-y:scroll;
+`
+
+const RawLogEntry = styled.div`
+  margin-bottom:8px;
+  overflow: anytime;
+  border-bottom: 1px solid #303030
+
 `
 
 const EntryDetailsHint = styled.div`

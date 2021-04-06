@@ -42,6 +42,7 @@ function App() {
   function handleRestart() {
     setLogEntries([])
     toastInfo("App launched")
+    logRaw("--- RESTART ---")
   }
 
   function logRaw(...lines: string[]) {
@@ -54,26 +55,29 @@ function App() {
   }) */
 
   React.useEffect(() => {
+    patchCLI()
     window.onbeforeunload = () => { server?.kill() }
     if (process.env["DEV_APPLICATION"])
       toastWarn("Started with special app " + process.env["DEV_APPLICATION"])
   }, [])
 
-  function patchCLI(){
-    
+  function patchCLI() {
+    const fs = require('fs')
+    fs.copyFileSync("./static/watchMode.dat",
+      getAppDir() + "/node_modules/@react-native-community/cli/build/commands/start/watchMode.js")
+    //
+  }
+
+  function getAppDir() {
+    return process.env["DEV_APPLICATION"] || process.cwd()
   }
 
   function startListening() {
-    patchCLI()
 
-    const specialApp = process.env["DEV_APPLICATION"]
-    if (specialApp) {
-      server = spawn(specialApp+"/node_modules/.bin/react-native", ["start"], {
-        cwd: specialApp,
-      });
-    } else {
-      server = spawn("npx", ["react-native", "start"]);
-    }
+    const appDir = getAppDir()
+    server = spawn(appDir + "/node_modules/.bin/react-native", ["start"], {
+      cwd: appDir,
+    });
 
     setIsProcessActive(true)
 
@@ -90,7 +94,6 @@ function App() {
 
         if (l.includes("BUNDLE")) {
           handleRestart()
-          logRaw("--- RESTART OF APPLICATION ---")
           continue
         }
         const entry = extractLogEntryFromRawText(l.toString())

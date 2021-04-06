@@ -83,6 +83,14 @@ rendererConfig.entry = './src/renderer/renderer.tsx';
 rendererConfig.target = 'electron-renderer';
 rendererConfig.output.filename = 'renderer.bundle.js';
 rendererConfig.plugins = [
+  new CopyPlugin({
+    patterns: [
+      {
+        from: "static",
+        to: "static"
+      }
+    ]
+  }),
   new HtmlWebpackPlugin({
     template: path.resolve(__dirname, './public/index.html'),
   }),

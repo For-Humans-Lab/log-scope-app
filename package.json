@@ -1,5 +1,5 @@
 {
-  "name": "log-scope-app",
+  "name": "log-scope-linux-app",
   "version": "3.0.0",
   "description": "The software to easy log reading",
   "main": "./dist/main.bundle.js",
@@ -13,11 +13,12 @@
     "build:linux": "electron-builder build --linux"
   },
   "bin": {
-    "log-scope-app": "./build/linux/log-scope-app"
+    "log-scope": "./build/linux/log-scope-linux-app"
   },
   "build": {
     "appId": "com.forhumanslab.logscopeapp",
-    "productName": "TreeLogReader",
+    "productName": "Log scope desktop application",
+    "artifactName": "log-scope",
     "npmArgs": [
       "--force"
     ],
@@ -42,6 +43,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/node": "^12.19.9",
+    "node-pty": "^0.10.0",
     "react": "^17.0.1",
     "react-checkbox-tree": "^1.6.0",
     "react-dom": "^17.0.1",
@@ -70,6 +72,7 @@
     "css-loader": "^5.0.1",
     "electron": "^11.1.1",
     "electron-builder": "^22.9.1",
+    "electron-rebuild": "^2.3.5",
     "eslint": "^7.16.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-import-resolver-webpack": "^0.13.0",
@@ -82,6 +85,7 @@
     "jest": "^26.6.3",
     "lodash": "^4.17.21",
     "mocha": "^8.2.1",
+    "node-loader": "^2.0.0",
     "rimraf": "^3.0.2",
     "source-map-loader": "^2.0.0",
     "spectron": "^13.0.0",

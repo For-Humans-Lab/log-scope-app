@@ -12,14 +12,14 @@ function createWindow(): void {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     height: 600,
-    width: 800,
-    title:"Log scope by For Humans Lab",
+    width: 1200,
+    title:"Log Scope by FHLab",
     autoHideMenuBar: true,
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true,
       contextIsolation: false,
-      devTools: process.env.NODE_ENV !== 'production',
+      devTools: true,
     },
   });
   mainWindow.webContents.openDevTools()

@@ -1,0 +1,68 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _readline() {
+  const data = _interopRequireDefault(require("readline"));
+
+  _readline = function () {
+    return data;
+  };
+
+  return data;
+}
+
+var _hookStdout = _interopRequireDefault(require("../../tools/hookStdout"));
+
+function _cliTools() {
+  const data = require("@react-native-community/cli-tools");
+
+  _cliTools = function () {
+    return data;
+  };
+
+  return data;
+}
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function printWatchModeInstructions() {
+  _cliTools().logger.log('\n\nTo reload the app press "r"\nTo open developer menu press "d"');
+}
+
+function enableWatchMode(messageSocket) {
+  // We need to set this to true to catch key presses individually.
+  // As a result we have to implement our own method for exiting
+  // and other commands (e.g. ctrl+c & ctrl+z)
+
+  console.log("Be careful - you are using a PATCHED cli for using with Log Scope")
+  
+  const restore = (0, _hookStdout.default)(output => {
+    if (output.includes('Learn once, write anywhere')) {
+      printWatchModeInstructions();
+      restore();
+    }
+  });
+
+  process.stdin.on('data', data=>{
+    const name = data.toString()[0]
+    console.log(name)
+     if (name === 'r') {
+      messageSocket.broadcast('reload', null);
+
+      _cliTools().logger.info('Reloading app...');
+    } else if (name === 'd') {
+      messageSocket.broadcast('devMenu', null);
+
+      _cliTools().logger.info('Opening developer menu...');
+    }
+  })
+}
+
+var _default = enableWatchMode;
+exports.default = _default;
+
+//# sourceMappingURL=watchMode.js.map

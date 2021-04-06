@@ -30,6 +30,7 @@ export default function LogEntryItem({ entry, onSelect }: { entry: LogEntry, onS
 
 const Message = styled.span`
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-wrap: anywhere;
 `
 
 const DataChip = styled.span`

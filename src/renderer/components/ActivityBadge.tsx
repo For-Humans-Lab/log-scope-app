@@ -6,7 +6,7 @@ export default function ActivityBadge(props: { isActive: boolean }) {
             height: 20,
             width:20,
             borderRadius: 20,
-            backgroundColor: props.isActive? "green":"darkgreen"
+            backgroundColor: props.isActive? "green":"yellow"
         }}>
 
         </div>

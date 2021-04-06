@@ -1,0 +1,1 @@
+./node_modules/log-scope-app/build/linux/log-scope-app --remote-debugging-port=8315

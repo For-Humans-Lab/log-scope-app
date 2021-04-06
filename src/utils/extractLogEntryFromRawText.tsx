@@ -5,7 +5,6 @@ export function extractLogEntryFromRawText(data: string): LogEntry {
   const pattern = /\[(?<time>.+)\]\s+LOG\s+(?<route>(\w|\s|\>)+)-\>(?<message>[^|]+)\|(?<object>.+)$/gm
   const match = pattern.exec(data.trim())
 
-
   return {
     id: Math.random().toString(),
     time: match?.groups!["time"] || "",

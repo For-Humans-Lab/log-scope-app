@@ -22,7 +22,7 @@ function createWindow(): void {
       devTools: process.env.NODE_ENV !== 'production',
     },
   });
-
+  mainWindow.webContents.openDevTools()
   // and load the index.html of the app.
   mainWindow.loadURL(
     url.format({

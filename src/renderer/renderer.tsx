@@ -7,7 +7,7 @@ import '_public/style.css';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import styled from 'styled-components'
-import { spawn } from 'child_process';
+import { ChildProcess, ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import { LogEntry } from '_/model/LogEntry';
 import LogEntryItem from './components/LogEntry';
 import { extractLogEntryFromRawText } from '_/utils/extractLogEntryFromRawText';
@@ -22,9 +22,11 @@ import isRoutesEqual from '_/utils/isRoutesEqual';
 import isRouteIsSubset from '_/utils/isRouteIsSubset';
 import { Route } from '_/model/Route';
 import unwrapRoute from '_/utils/unwrapRoute';
+import { toastInfo, toastWarn } from '_/utils/toasts';
 
 const MENU_BAR_HEIGHT = 50
 
+let server: ChildProcessWithoutNullStreams | undefined = undefined
 
 function App() {
   const [logEntries, setLogEntries] = React.useState<LogEntry[]>([]);
@@ -38,21 +40,32 @@ function App() {
 
   function handleRestart() {
     setLogEntries([])
-    toast("App launched", {
-      style: {
-        backgroundColor: "gray",
-        color: "black"
-      },
-      position: 'bottom-right'
-    })
+    toastInfo("App launched")
   }
 
   function logRaw(...lines: string[]) {
     setRaw(raw => [...lines, ...raw])
   }
+  /* 
+  require('electron').remote.getCurrentWindow().on('close', () => {
+    server?.kill()
+    console.log("kill")
+  }) */
+
+  React.useEffect(() => {
+    window.onbeforeunload = () => { server?.kill() }
+  }, [])
+
+  if (process.env["DEV_APPLICATION"])
+    toastWarn("Started with special app " + process.env["DEV_APPLICATION"])
 
   function startListening() {
-    const server = spawn(process.env.NODE_ENV == "development" ? './emulate_realtime_stdout.sh' : "npm run start", []);
+    const specialApp = process.env["DEV_APPLICATION"]
+    if (specialApp) {
+      server = spawn(specialApp, ["start"]);
+    } else {
+      server = spawn("npx", ["react-native", "start"]);
+    }
 
     setIsProcessActive(true)
 
@@ -127,12 +140,22 @@ function App() {
           routes={routes} />
         <div style={{ flex: 1, height: "auto" }} />
         <Log>
-          {raw.map(r => <div style={{marginBottom:8}}>{r}</div>)}
+          {raw.map(r => <div style={{ marginBottom: 8 }}>{r}</div>)}
         </Log>
       </LeftSideBar>
       <Content>
         <MenuBar>
-          <button onClick={startListening}>Run</button>
+          <button onClick={() => {
+            try {
+              startListening()
+            } catch (ex) {
+              toast(ex)
+            }
+          }}>Run</button>
+          <button onClick={() => {
+            console.log(server)
+            server?.stdin.write(String.fromCharCode(18)/* ctrl + r */ + "\r\n")
+          }}>Restart</button>
           <ActivityBadge isActive={isProcessActive} />
         </MenuBar>
         <div style={{ height: `calc(100% - ${MENU_BAR_HEIGHT}px - 1px)` }}>
@@ -158,7 +181,6 @@ function App() {
 
 const Log = styled.div`
   height: 300px;
-  border-top: 1px solid #666666;
   color: #8b8b8b;
   padding: 4px;
   overflow-y:scroll;

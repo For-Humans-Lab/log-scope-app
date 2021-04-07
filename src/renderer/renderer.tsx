@@ -106,7 +106,6 @@ function App() {
       logRaw(data)
       const lines = data.split('\n');
 
-
       const logentries: LogEntry[] = [];
       const newRoutes: Route[] = []
 
@@ -163,6 +162,7 @@ function App() {
   }
   function actionReloadApp() {
     setServerActivity(ActivityState.Bundling)
+    setLogEntries([])
     server?.stdin.write("r\r\n")
   }
 

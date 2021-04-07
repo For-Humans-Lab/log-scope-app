@@ -31,6 +31,10 @@ const MENU_BAR_HEIGHT = 30
 
 let server: ChildProcessWithoutNullStreams | undefined = undefined
 
+function getAppDir() {
+  return process.env["DEV_APPLICATION"] || process.cwd()
+}
+
 function App() {
   const [logEntries, setLogEntries] = React.useState<LogEntry[]>([]);
   const [serverActivity, setServerActivity] = React.useState(ActivityState.Offline)
@@ -65,9 +69,6 @@ function App() {
     //
   }
 
-  function getAppDir() {
-    return process.env["DEV_APPLICATION"] || process.cwd()
-  }
 
   function processLogEvents(log: string) {
     if (log.includes("BUNDLE")) {

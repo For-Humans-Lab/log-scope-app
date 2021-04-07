@@ -42,6 +42,7 @@
   "author": "For Humans Lab",
   "license": "MIT",
   "dependencies": {
+    "@material-ui/icons": "^4.11.2",
     "@types/node": "^12.19.9",
     "node-pty": "^0.10.0",
     "react": "^17.0.1",

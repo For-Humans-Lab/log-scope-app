@@ -1,14 +1,29 @@
 import * as React from "react";
+import styled from 'styled-components'
 
-export default function ActivityBadge(props: { isActive: boolean }) {
+export enum ActivityState {
+    Offline,
+    Idle,
+    Bundling,
+    Running
+}
+
+export default function ActivityBadge({ activity }: { activity: ActivityState }) {
+    console.log("render")
     return (
-        <div style={{
-            height: 20,
-            width:20,
-            borderRadius: 20,
-            backgroundColor: props.isActive? "green":"yellow"
-        }}>
-
-        </div>
+        <>
+            <Badge color={activity == ActivityState.Idle ? "#41A9AF" : "gray"} />
+            <Badge color={activity == ActivityState.Bundling ? "#8F68CE" : "gray"}  />
+            <Badge color={activity == ActivityState.Running ? "#AE529A" : "gray"}  />
+        </>
     )
 }
+
+const Badge = styled.div<{ color: string }>`
+    transition-duration: 400ms;
+    height: 12px;
+    width:12px;
+    margin: 4px;
+    border-radius: 20px;
+    background-color: ${props => props.color}
+`

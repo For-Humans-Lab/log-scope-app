@@ -14,7 +14,7 @@ import { extractLogEntryFromRawText } from '_/utils/extractLogEntryFromRawText';
 import LogEntryList from './LogEntriesList/LogEntriesList';
 import LogEntryDetails from './LogEntryDetails/LogEntryDetails';
 import TreeFilter from './TreeFilter/TreeFilter';
-import ActivityBadge from './components/ActivityBadge';
+import ActivityBadge, { ActivityState } from './components/ActivityBadge';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -24,14 +24,17 @@ import { Route } from '_/model/Route';
 import unwrapRoute from '_/utils/unwrapRoute';
 import { toastInfo, toastWarn } from '_/utils/toasts';
 import { trimEnd } from 'lodash';
+import StartIcon from '@material-ui/icons/PlayArrow';
+import ReloadIcon from '@material-ui/icons/Replay'
+import StopIcon from '@material-ui/icons/Stop'
 
-const MENU_BAR_HEIGHT = 50
+const MENU_BAR_HEIGHT = 30
 
 let server: ChildProcessWithoutNullStreams | undefined = undefined
 
 function App() {
   const [logEntries, setLogEntries] = React.useState<LogEntry[]>([]);
-  const [isProcessActive, setIsProcessActive] = React.useState(false)
+  const [serverActivity, setServerActivity] = React.useState(ActivityState.Offline)
   const [selectedEntry, setSelectedEntry] = React.useState<LogEntry>()
 
   const [routes, setRoutes] = React.useState<Route[]>([])
@@ -48,11 +51,6 @@ function App() {
   function logRaw(...lines: string[]) {
     setRaw(raw => [...lines, ...raw])
   }
-  /* 
-  require('electron').remote.getCurrentWindow().on('close', () => {
-    server?.kill()
-    console.log("kill")
-  }) */
 
   React.useEffect(() => {
     patchCLI()
@@ -72,14 +70,27 @@ function App() {
     return process.env["DEV_APPLICATION"] || process.cwd()
   }
 
-  function startListening() {
+  function processLogEvents(log: string) {
+    if (log.includes("BUNDLE")) {
+      setServerActivity(ActivityState.Bundling)
+      return false;
+    }
 
+    if(log.includes("Running")){
+      setServerActivity(ActivityState.Running)
+      return false;
+    }
+
+    return true
+  }
+
+  function startListening() {
     const appDir = getAppDir()
     server = spawn(appDir + "/node_modules/.bin/react-native", ["start"], {
       cwd: appDir,
     });
 
-    setIsProcessActive(true)
+    setServerActivity(ActivityState.Idle)
 
     server.stdout.on('data', (databuffer: Buffer) => {
       const lines = databuffer.toString().split('\n');
@@ -92,10 +103,10 @@ function App() {
         if (l.length == 0)
           continue;
 
-        if (l.includes("BUNDLE")) {
-          handleRestart()
+        if (!processLogEvents(l)) {
           continue
         }
+
         const entry = extractLogEntryFromRawText(l.toString())
 
         const explored = routes.find(p => isRoutesEqual(p, entry.route))
@@ -118,17 +129,11 @@ function App() {
 
     server.stderr.on('data', (data: Buffer) => {
       console.log(`stderr: ${data}`);
-      toast(`Error ${data.toString()}`, {
-        style: {
-          backgroundColor: "orange",
-          color: "black"
-        },
-        position: 'bottom-right'
-      })
+      toastWarn(`Error ${data.toString()}`)
     });
 
     server.on('close', (_code: number) => {
-      setIsProcessActive(false)
+      setServerActivity(ActivityState.Offline)
     });
   }
 
@@ -140,6 +145,20 @@ function App() {
       }
       return false
     })
+  }
+
+  function actionStopServer() {
+    server?.kill()
+    setRaw([])
+    setLogEntries([])
+    setRoutes([])
+    setSelectedRoutes([])
+    setSelectedEntry(undefined)
+    toastInfo("Server stopped manually")
+  }
+  function actionReloadApp() {
+    setServerActivity(ActivityState.Bundling)
+    server?.stdin.write("r\r\n")
   }
 
   return (
@@ -156,22 +175,24 @@ function App() {
       </LeftSideBar>
       <Content>
         <MenuBar>
-          <button onClick={() => {
-            try {
-              startListening()
-            } catch (ex) {
-              toast(ex)
-            }
-          }}>Run</button>
-          <button onClick={() => {
-            server?.stdin.write("r\r\n")
-          }}>Restart</button>
-          {isProcessActive ? <button onClick={() => {
-            server?.kill()
-            toastInfo("Server stopped manually")
-          }}>Stop server</button> : null}
+          <MenuBarButton onClick={startListening}>
+            <StartIcon style={{ color: "gray" }} />
+          </MenuBarButton>
 
-          <ActivityBadge isActive={isProcessActive} />
+          {serverActivity != ActivityState.Offline ? (<>
+            <MenuBarButton onClick={actionReloadApp}>
+              <ReloadIcon style={{ color: "gray", fontSize: 18 }} />
+            </MenuBarButton>
+            <MenuBarButton onClick={actionStopServer}>
+              <StopIcon style={{ color: "gray" }} />
+            </MenuBarButton>
+          </>) : null}
+          <div style={{ flex: 1 }} />
+
+          <MenuBarButton>
+            <ActivityBadge activity={serverActivity} />
+          </MenuBarButton>
+
         </MenuBar>
         <div style={{ height: `calc(100% - ${MENU_BAR_HEIGHT}px - 1px)` }}>
           <LogEntryList
@@ -207,6 +228,16 @@ const RawLogEntry = styled.div`
   border-bottom: 1px solid #303030
 
 `
+const MenuBarButton = styled.div`
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height: ${MENU_BAR_HEIGHT}px;
+  min-width:${MENU_BAR_HEIGHT}px;
+  :hover{
+    background-color: #ffffff11;
+  }
+`
 
 const EntryDetailsHint = styled.div`
   display:flex;
@@ -240,6 +271,7 @@ const RightSideBar = styled.div`
 `
 
 const MenuBar = styled.div`
+padding: 0 8px;
   height: ${MENU_BAR_HEIGHT}px;
   flex-direction: row;
   background-color: #3f3f3f;

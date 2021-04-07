@@ -22,7 +22,6 @@ import isRoutesEqual from '_/utils/isRoutesEqual';
 import isRouteIsSubset from '_/utils/isRouteIsSubset';
 import { Route } from '_/model/Route';
 import unwrapRoute from '_/utils/unwrapRoute';
-import { toastInfo, toastWarn } from '_/utils/toasts';
 import { trimEnd } from 'lodash';
 import StartIcon from '@material-ui/icons/PlayArrow';
 import ReloadIcon from '@material-ui/icons/Replay'
@@ -42,9 +41,10 @@ function App() {
 
   const [raw, setRaw] = React.useState<string[]>([])
 
+  const [warning, setWarning] = React.useState<string | undefined>()
+
   function handleRestart() {
     setLogEntries([])
-    toastInfo("App launched")
     logRaw("--- RESTART ---")
   }
 
@@ -55,8 +55,7 @@ function App() {
   React.useEffect(() => {
     patchCLI()
     window.onbeforeunload = () => { server?.kill() }
-    if (process.env["DEV_APPLICATION"])
-      toastWarn("Started with special app " + process.env["DEV_APPLICATION"])
+
   }, [])
 
   function patchCLI() {
@@ -76,8 +75,13 @@ function App() {
       return false;
     }
 
-    if(log.includes("Running")){
+    if (log.includes("Running")) {
       setServerActivity(ActivityState.Running)
+      return false;
+    }
+
+    if (log.includes("Possible Unhandled Promise Rejection")) {
+      setWarning(log)
       return false;
     }
 
@@ -93,8 +97,15 @@ function App() {
     setServerActivity(ActivityState.Idle)
 
     server.stdout.on('data', (databuffer: Buffer) => {
-      const lines = databuffer.toString().split('\n');
-      logRaw(...lines)
+      const data = databuffer.toString()
+
+      if (!processLogEvents(data)) {
+        return
+      }
+
+      logRaw(data)
+      const lines = data.split('\n');
+
 
       const logentries: LogEntry[] = [];
       const newRoutes: Route[] = []
@@ -102,10 +113,6 @@ function App() {
       for (const l of lines) {
         if (l.length == 0)
           continue;
-
-        if (!processLogEvents(l)) {
-          continue
-        }
 
         const entry = extractLogEntryFromRawText(l.toString())
 
@@ -129,7 +136,6 @@ function App() {
 
     server.stderr.on('data', (data: Buffer) => {
       console.log(`stderr: ${data}`);
-      toastWarn(`Error ${data.toString()}`)
     });
 
     server.on('close', (_code: number) => {
@@ -154,7 +160,6 @@ function App() {
     setRoutes([])
     setSelectedRoutes([])
     setSelectedEntry(undefined)
-    toastInfo("Server stopped manually")
   }
   function actionReloadApp() {
     setServerActivity(ActivityState.Bundling)
@@ -201,6 +206,15 @@ function App() {
         </div>
       </Content>
       <RightSideBar>
+        {warning ? (
+          <WarningPanel>
+            <WarningPanelCloseButton onClick={()=>setWarning(undefined)}>
+              Close
+            </WarningPanelCloseButton>
+            {warning}
+          </WarningPanel>
+        ) : null}
+
         {selectedEntry ?
           <LogEntryDetails entry={selectedEntry} />
           : (
@@ -215,16 +229,34 @@ function App() {
   );
 }
 
+const WarningPanelCloseButton = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: darkorange;
+
+`
+
+const WarningPanel = styled.div`
+  position: absolute;
+  background-color: orange;
+  height: 100%;
+  width: 300px;
+  overflow-y: scroll;
+  overflow-wrap: anywhere;
+`
+
 const RawLog = styled.div`
   height: 300px;
   color: #8b8b8b;
   padding: 4px;
   overflow-y:scroll;
+  overflow-x: hidden;
 `
 
 const RawLogEntry = styled.div`
   margin-bottom:8px;
-  overflow: anytime;
+  overflow: anywhere;
   border-bottom: 1px solid #303030
 
 `

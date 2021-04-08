@@ -5,14 +5,11 @@ import _ from "lodash";
 
 export default function LogEntryItem({ entry, onSelect }: { entry: LogEntry, onSelect: () => void }) {
     return (
-        <Container style={{ cursor: "pointer" }} onClick={onSelect}>
+        <Container hasData={Object.keys(entry.object).length != 0 } style={{ cursor: "pointer" }} onClick={onSelect}>
             <DataBlock>
                 <Message>
                     {entry.message}
                 </Message>
-
-                <div style={{ flex: 1 }} />
-                {Object.keys(entry.object).length != 0 ? <DataChip >DATA</DataChip> : null}
             </DataBlock>
 
             <MetaBar>
@@ -20,9 +17,9 @@ export default function LogEntryItem({ entry, onSelect }: { entry: LogEntry, onS
                     {entry.route.join(" > ")}
                 </RouteHint>
                 <div style={{ flex: 1 }} />
-                <TimeHint>
+                {/*  <TimeHint>
                     {entry.time}
-                </TimeHint>
+                </TimeHint> */}
             </MetaBar>
         </Container>
     );
@@ -33,16 +30,7 @@ const Message = styled.span`
     overflow-wrap: anywhere;
 `
 
-const DataChip = styled.span`
-    border-radius:8px;
-    border:1px solid white;
-    padding:4px;
-    
-    background-color:#444444;
-    font-size:8px;
-`
-
-const Container = styled.div`
+const Container = styled.div<{ hasData: boolean }>`
     background-color: #363636;
     padding:8px;
     margin:4px;
@@ -52,6 +40,8 @@ const Container = styled.div`
     font-size:14px;
     color: white;
     font-family: Arial;
+    border-left: ${props => props.hasData? "solid #5d5dac 4px" : "none"};
+    border-right: ${props => props.hasData? "solid #5d5dac 4px" : "none"};
   `
 
 const MetaBar = styled.div`
@@ -64,10 +54,6 @@ const MetaBar = styled.div`
 
 const RouteHint = styled.div`
 
-`
-
-const TimeHint = styled.div`
-   
 `
 
 const DataBlock = styled.div`

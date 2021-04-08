@@ -61,6 +61,7 @@ const Title = styled.div`
 
 const Container = styled.div`
     flex: 1;
+    
     color:white;
     padding:8px;
 `

@@ -22,7 +22,7 @@ export default function ActivityBadge({ activity }: { activity: ActivityState })
 const Badge = styled.div<{ color: string }>`
     transition-duration: 400ms;
     height: 12px;
-    width:6px;
+    width:20px;
     margin: 4px;
     border-radius: 20px;
     background-color: ${props => props.color}

@@ -41,7 +41,8 @@ function App() {
   const [selectedEntry, setSelectedEntry] = React.useState<LogEntry>()
 
   const [routes, setRoutes] = React.useState<Route[]>([])
-  const [selectedRoutes, setSelectedRoutes] = React.useState<Route[]>([])
+  const [activatedRoutes, setActivatedRoutes] = React.useState<Route[]>([])
+  const [mutedRoutes, setMutedRoutes] = React.useState<Route[]>([])
 
   const [raw, setRaw] = React.useState<string[]>([])
 
@@ -57,6 +58,7 @@ function App() {
   }
 
   React.useEffect(() => {
+    console.log(getAppDir())
     patchCLI()
     window.onbeforeunload = () => { server?.kill() }
 
@@ -116,6 +118,9 @@ function App() {
 
         const entry = extractLogEntryFromRawText(l.toString())
 
+        if (!entry)
+          continue
+
         const explored = routes.find(p => isRoutesEqual(p, entry.route))
         if (!explored) {
           newRoutes.push(entry.route)
@@ -127,7 +132,7 @@ function App() {
       setLogEntries((oldlogentries) => [...oldlogentries, ...logentries]);
 
       const allVariationsOfRoutes = newRoutes.reduce((p, r) => [...p, ...unwrapRoute(r)], [] as Route[])
-      setSelectedRoutes((selected) =>
+      setActivatedRoutes((selected) =>
         [...selected,
         ...allVariationsOfRoutes.filter(r => !routes.some(kr => isRoutesEqual(r, kr)))])
 
@@ -145,7 +150,7 @@ function App() {
 
   function getActiveEntries() {
     return logEntries.filter(e => {
-      for (const r of selectedRoutes) {
+      for (const r of activatedRoutes) {
         if (isRouteIsSubset(e.route, r))
           return true
       }
@@ -158,7 +163,7 @@ function App() {
     setRaw([])
     setLogEntries([])
     setRoutes([])
-    setSelectedRoutes([])
+    setActivatedRoutes([])
     setSelectedEntry(undefined)
   }
   function actionReloadApp() {
@@ -171,8 +176,8 @@ function App() {
     <Container>
       <LeftSideBar>
         <TreeFilter
-          onSelectedChange={(routes) => setSelectedRoutes(routes)}
-          selectedRoutes={selectedRoutes}
+          onSelectedChange={(routes) => setActivatedRoutes(routes)}
+          selectedRoutes={activatedRoutes}
           routes={routes} />
         <div style={{ flex: 1, height: "auto" }} />
         <RawLog>
@@ -209,7 +214,7 @@ function App() {
       <RightSideBar>
         {warning ? (
           <WarningPanel>
-            <WarningPanelCloseButton onClick={()=>setWarning(undefined)}>
+            <WarningPanelCloseButton onClick={() => setWarning(undefined)}>
               Close
             </WarningPanelCloseButton>
             {warning}
@@ -248,7 +253,7 @@ const WarningPanel = styled.div`
 `
 
 const RawLog = styled.div`
-  height: 300px;
+  height: 200px;
   color: #8b8b8b;
   padding: 4px;
   overflow-y:scroll;
@@ -300,7 +305,8 @@ const Content = styled.div`
 `
 
 const RightSideBar = styled.div`
-  width:300px;
+  width:400px;
+  overflow-x: scroll;
 `
 
 const MenuBar = styled.div`

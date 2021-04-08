@@ -32,6 +32,7 @@ export default function genTreeFromRoutes(routes: Route[], selected: Route[], ro
         const children = genTreeFromRoutes(next, selectionGroups.get(gName)!, cRoute) // recursively find leafs
         leafs.push({
             name: gName,
+            id: cRoute.join(" > "),
             children,
             isExpanded: !!children.length,
             isChecked: isGroupChecks.get(gName),

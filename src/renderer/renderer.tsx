@@ -40,8 +40,7 @@ function App() {
   const [serverActivity, setServerActivity] = React.useState(ActivityState.Offline)
   const [selectedEntry, setSelectedEntry] = React.useState<LogEntry>()
 
-  const [routes, setRoutes] = React.useState<Route[]>([])
-  const [activatedRoutes, setActivatedRoutes] = React.useState<Route[]>([])
+  const [activeRoutes, setActivatedRoutes] = React.useState<Route[]>([])
   const [mutedRoutes, setMutedRoutes] = React.useState<Route[]>([])
 
   const [raw, setRaw] = React.useState<string[]>([])
@@ -91,6 +90,35 @@ function App() {
     return true
   }
 
+  const dataFetchCallback = React.useCallback((lines: string[]) => {
+    const logentries: LogEntry[] = [];
+    const foundRoutes: Route[] = []
+
+    for (const l of lines) {
+      if (l.length == 0)
+        continue;
+
+      const entry = extractLogEntryFromRawText(l.toString())
+
+      if (!entry)
+        continue
+
+      foundRoutes.push(entry.route)
+      logentries.push(entry);
+    }
+
+    setLogEntries((oldlogentries) => [...oldlogentries, ...logentries]);
+
+    const allNestedRoutes = foundRoutes.reduce((p, r) => [...p, ...unwrapRoute(r)], [] as Route[])
+
+    const onlyNew = allNestedRoutes.filter(r =>
+      !activeRoutes.some(kr => isRoutesEqual(r, kr))
+      && !mutedRoutes.some(kr => isRoutesEqual(r, kr)))
+
+    console.log(mutedRoutes)
+    setActivatedRoutes((selected) => [...selected, ...onlyNew])
+  }, [])
+
   function startListening() {
     const appDir = getAppDir()
     server = spawn(appDir + "/node_modules/.bin/react-native", ["start"], {
@@ -107,36 +135,10 @@ function App() {
       }
 
       logRaw(data)
+
       const lines = data.split('\n');
 
-      const logentries: LogEntry[] = [];
-      const newRoutes: Route[] = []
-
-      for (const l of lines) {
-        if (l.length == 0)
-          continue;
-
-        const entry = extractLogEntryFromRawText(l.toString())
-
-        if (!entry)
-          continue
-
-        const explored = routes.find(p => isRoutesEqual(p, entry.route))
-        if (!explored) {
-          newRoutes.push(entry.route)
-        }
-
-        logentries.push(entry);
-      }
-
-      setLogEntries((oldlogentries) => [...oldlogentries, ...logentries]);
-
-      const allVariationsOfRoutes = newRoutes.reduce((p, r) => [...p, ...unwrapRoute(r)], [] as Route[])
-      setActivatedRoutes((selected) =>
-        [...selected,
-        ...allVariationsOfRoutes.filter(r => !routes.some(kr => isRoutesEqual(r, kr)))])
-
-      setRoutes(rts => [...rts, ...newRoutes])
+      dataFetchCallback(lines)
     });
 
     server.stderr.on('data', (data: Buffer) => {
@@ -150,7 +152,7 @@ function App() {
 
   function getActiveEntries() {
     return logEntries.filter(e => {
-      for (const r of activatedRoutes) {
+      for (const r of activeRoutes) {
         if (isRouteIsSubset(e.route, r))
           return true
       }
@@ -162,8 +164,6 @@ function App() {
     server?.kill()
     setRaw([])
     setLogEntries([])
-    setRoutes([])
-    setActivatedRoutes([])
     setSelectedEntry(undefined)
   }
   function actionReloadApp() {
@@ -176,9 +176,12 @@ function App() {
     <Container>
       <LeftSideBar>
         <TreeFilter
-          onSelectedChange={(routes) => setActivatedRoutes(routes)}
-          selectedRoutes={activatedRoutes}
-          routes={routes} />
+          onRoutesChange={(active, muted) => {
+            setActivatedRoutes(active)
+            setMutedRoutes(muted)
+          }}
+          activeRoutes={activeRoutes}
+          mutedRoutes={mutedRoutes} />
         <div style={{ flex: 1, height: "auto" }} />
         <RawLog>
           {raw.map(r => <RawLogEntry>{r}</RawLogEntry>)}
@@ -186,9 +189,11 @@ function App() {
       </LeftSideBar>
       <Content>
         <MenuBar>
-          <MenuBarButton onClick={startListening}>
-            <StartIcon style={{ color: "gray" }} />
-          </MenuBarButton>
+          {!serverActivity ? (
+            <MenuBarButton onClick={startListening}>
+              <StartIcon style={{ color: "gray" }} />
+            </MenuBarButton>
+          ) : null}
 
           {serverActivity != ActivityState.Offline ? (<>
             <MenuBarButton onClick={actionReloadApp}>

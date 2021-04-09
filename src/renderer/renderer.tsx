@@ -211,7 +211,9 @@ function App() {
           routes={routes} />
         <div style={{ flex: 1, height: "auto" }} />
         <RawLog>
-          {raw.map(r => <RawLogEntry>{r}</RawLogEntry>)}
+          {raw.length ? (
+            <RawLogEntry>{raw[0]}</RawLogEntry>
+          ) : null}
         </RawLog>
       </LeftSideBar>
       <Content>
@@ -296,7 +298,7 @@ function App() {
         }
       </RightSideBar>
       <ToastContainer />
-    </Container>
+    </Container >
   );
 }
 
@@ -342,9 +344,10 @@ const TracebackPanelContainer = styled.div`
 `
 
 const RawLog = styled.div`
-  height: 200px;
+  max-height: 100px;
   color: #8b8b8b;
   padding: 4px;
+  background-color: #2b2b2b;
   overflow-y:scroll;
   overflow-x: hidden;
 `
@@ -352,7 +355,6 @@ const RawLog = styled.div`
 const RawLogEntry = styled.div`
   margin-bottom:8px;
   overflow: anywhere;
-  border-bottom: 1px solid #303030
 
 `
 const MenuBarButton = styled.div`

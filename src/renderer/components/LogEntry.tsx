@@ -14,7 +14,7 @@ export default function LogEntryItem({ entry, onSelect }: { entry: LogEntry, onS
 
             <MetaBar>
                 <RouteHint>
-                    {entry.route.join(" > ")}
+                    {entry.routeParts.join(" > ")}
                 </RouteHint>
                 <div style={{ flex: 1 }} />
                 {/*  <TimeHint>

@@ -6,31 +6,35 @@ import SuperTreeview from 'react-super-treeview';
 import 'react-super-treeview/dist/style.css'
 import genTreeFromRoutes from "./genTreeFromRoutes";
 import _ from "lodash";
-import isRoutesEqual from "_/utils/isRoutesEqual";
-import { Route } from "_/model/Route";
+import isRoutesEqual from "_/utils/isRoutePartsEqual";
+import { EventRoute } from "_/model/EventRoute";
 
 import UncheckIcon from '@material-ui/icons/CheckBoxOutlineBlank'
 import CheckIcon from '@material-ui/icons/CheckBoxOutlined'
+import cloneRoutes from "_/utils/cloneRoutes";
 
 
-export default function TreeFilter({ mutedRoutes, onRoutesChange, activeRoutes }: {
-    mutedRoutes: Route[],
-    activeRoutes: Route[],
-    onRoutesChange: (active: Route[], muted: Route[]) => void,
+export default function TreeFilter({ routes, onRouteUpdates: onRouteUpdate }: {
+    routes: EventRoute[],
+    onRouteUpdates: (routes: EventRoute[]) => void,
 }) {
-    const [tree, setTree] = React.useState<any>([])
-
-    React.useEffect(() => {
-        setTree(genTreeFromRoutes([...mutedRoutes, ...activeRoutes], activeRoutes, []))
-    }, [activeRoutes, mutedRoutes])
+    const [tree, setTree] = React.useState<any>()
 
     function muteAll() {
-        onRoutesChange([], [...activeRoutes, ...mutedRoutes])
+        routes.forEach(r=>r.isActive = false)
+        onRouteUpdate([...routes])
     }
 
     function activateAll() {
-        onRoutesChange([...activeRoutes, ...mutedRoutes], [])
+        routes.forEach(r=>r.isActive = true)
+        onRouteUpdate([...routes])
     }
+
+    React.useEffect(() => {
+        setTree(genTreeFromRoutes(cloneRoutes(routes)))
+    }, [routes])
+
+    console.log("tree render")
 
     return (
         <Container>
@@ -46,21 +50,18 @@ export default function TreeFilter({ mutedRoutes, onRoutesChange, activeRoutes }
             </Title>
             <SuperTreeview
                 data={tree}
-                onUpdateCb={(updatedData: any) => {
-                    setTree(updatedData)
-                }}
                 onCheckToggleCb={(nodes: any, depth: any) => {
                     const node = nodes[0]
                     const isChecked = node.isChecked as boolean
-                    console.log(node)
-                    const route = node.route as string[]
+                    const route = routes.find(r => r.id == node.id)!
                     if (isChecked) {
-                        onRoutesChange([...activeRoutes, route], mutedRoutes.filter(r => !(isRoutesEqual(r, route))))
+                        route.isActive = true
+                        onRouteUpdate([...routes])
                     }
                     else {
-                        onRoutesChange(activeRoutes.filter(r => !(isRoutesEqual(r, route))), [...mutedRoutes, route])
+                        route.isActive = false
+                        onRouteUpdate([...routes])
                     }
-
                 }}
 
                 isDeletable={() => false}

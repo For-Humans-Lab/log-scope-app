@@ -1,9 +1,9 @@
-import { Route } from "_/model/Route";
+import { EventRoute } from "_/model/EventRoute";
 
-export default function (route: Route): Route[] {
-    const accum: Route = []
-    return route.map(r => {
+export default function (route: EventRoute): EventRoute[] {
+    const accum: string[] = []
+    return route.parts.map(r => {
         accum.push(r)
-        return [...accum]
+        return new EventRoute([...accum], true)
     })
 }

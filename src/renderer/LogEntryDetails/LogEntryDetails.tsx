@@ -11,7 +11,7 @@ export default function LogEntryDetails({ entry }: { entry: LogEntry | undefined
                     Route
                 </div>
                 <Route>
-                    {entry?.route.map((r, i) => <div key={r} style={{ paddingLeft: i * 10 }}>{"> " + r}</div>)}
+                    {entry?.routeParts.map((r, i) => <div key={r} style={{ paddingLeft: i * 10 }}>{"> " + r}</div>)}
                 </Route>
 
             </RouteBlock>

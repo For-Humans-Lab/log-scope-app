@@ -18,14 +18,15 @@ import ActivityBadge, { ActivityState } from './components/ActivityBadge';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import isRoutesEqual from '_/utils/isRoutesEqual';
 import isRouteIsSubset from '_/utils/isRouteIsSubset';
-import { Route } from '_/model/Route';
 import unwrapRoute from '_/utils/unwrapRoute';
 import { trimEnd } from 'lodash';
 import StartIcon from '@material-ui/icons/PlayArrow';
 import ReloadIcon from '@material-ui/icons/Replay'
 import StopIcon from '@material-ui/icons/Stop'
+import isRoutePartEqual from '_/utils/isRoutePartsEqual';
+import { EventRoute } from '_/model/EventRoute';
+import useRemoteState from '_/utils/useRemoteState';
 
 const MENU_BAR_HEIGHT = 30
 
@@ -35,22 +36,19 @@ function getAppDir() {
   return process.env["DEV_APPLICATION"] || process.cwd()
 }
 
+const logQueue: string[] = []
+let isLogHandling = false
+
 function App() {
-  const [logEntries, setLogEntries] = React.useState<LogEntry[]>([]);
+  const [logEntries, setLogEntries, getLogEntries] = useRemoteState<LogEntry[]>([]);
   const [serverActivity, setServerActivity] = React.useState(ActivityState.Offline)
   const [selectedEntry, setSelectedEntry] = React.useState<LogEntry>()
 
-  const [activeRoutes, setActivatedRoutes] = React.useState<Route[]>([])
-  const [mutedRoutes, setMutedRoutes] = React.useState<Route[]>([])
+  const [routes, setRoutes, getRoutes] = useRemoteState<EventRoute[]>([])
 
   const [raw, setRaw] = React.useState<string[]>([])
 
   const [warning, setWarning] = React.useState<string | undefined>()
-
-  function handleRestart() {
-    setLogEntries([])
-    logRaw("--- RESTART ---")
-  }
 
   function logRaw(...lines: string[]) {
     setRaw(raw => [...lines, ...raw])
@@ -73,6 +71,7 @@ function App() {
 
   function processLogEvents(log: string) {
     if (log.includes("BUNDLE")) {
+      setLogEntries([])
       setServerActivity(ActivityState.Bundling)
       return false;
     }
@@ -90,9 +89,30 @@ function App() {
     return true
   }
 
-  const dataFetchCallback = React.useCallback((lines: string[]) => {
-    const logentries: LogEntry[] = [];
-    const foundRoutes: Route[] = []
+  async function readEventsRec() {
+    console.log("Read invoked", logQueue.length, isLogHandling)
+    if (!logQueue.length || isLogHandling)
+      return
+
+    isLogHandling = true
+
+    const data = logQueue.pop()!
+
+    if (!processLogEvents(data)) {
+      isLogHandling = false
+      return
+    }
+
+    logRaw(data)
+
+    const lines = data.split('\n');
+
+    const entries = getLogEntries()
+    const routes = getRoutes()
+    console.log('got data')
+
+    const newLogEntries: LogEntry[] = []
+    const newRoutes: EventRoute[] = []
 
     for (const l of lines) {
       if (l.length == 0)
@@ -103,21 +123,31 @@ function App() {
       if (!entry)
         continue
 
-      foundRoutes.push(entry.route)
-      logentries.push(entry);
+      const foundRoute = routes.find(p => isRoutePartEqual(p.parts, entry.routeParts))
+
+      if (!foundRoute) {
+        const event = new EventRoute(entry.routeParts, true)
+        console.log("new")
+        const nested = unwrapRoute(event)
+        let onlyNew = nested.filter(n => !routes.some(r => isRoutePartEqual(r.parts, n.parts)))
+        onlyNew = onlyNew.filter(n => !newRoutes.some(r => isRoutePartEqual(r.parts, n.parts)))
+        newRoutes.push(...onlyNew)
+
+        entry.route = foundRoute
+      }
+      else {
+        entry.route = foundRoute
+      }
+
+      newLogEntries.push(entry)
     }
+    setLogEntries([...entries, ...newLogEntries])
+    setRoutes([...routes, ...newRoutes])
 
-    setLogEntries((oldlogentries) => [...oldlogentries, ...logentries]);
-
-    const allNestedRoutes = foundRoutes.reduce((p, r) => [...p, ...unwrapRoute(r)], [] as Route[])
-
-    const onlyNew = allNestedRoutes.filter(r =>
-      !activeRoutes.some(kr => isRoutesEqual(r, kr))
-      && !mutedRoutes.some(kr => isRoutesEqual(r, kr)))
-
-    console.log(mutedRoutes)
-    setActivatedRoutes((selected) => [...selected, ...onlyNew])
-  }, [])
+    isLogHandling = false;
+    console.log("end")
+    readEventsRec()
+  }
 
   function startListening() {
     const appDir = getAppDir()
@@ -127,18 +157,12 @@ function App() {
 
     setServerActivity(ActivityState.Idle)
 
-    server.stdout.on('data', (databuffer: Buffer) => {
+    server.stdout.on('data', async (databuffer: Buffer) => {
       const data = databuffer.toString()
 
-      if (!processLogEvents(data)) {
-        return
-      }
+      logQueue.unshift(data)
 
-      logRaw(data)
-
-      const lines = data.split('\n');
-
-      dataFetchCallback(lines)
+      readEventsRec()
     });
 
     server.stderr.on('data', (data: Buffer) => {
@@ -151,9 +175,10 @@ function App() {
   }
 
   function getActiveEntries() {
+    console.log("test", routes)
     return logEntries.filter(e => {
-      for (const r of activeRoutes) {
-        if (isRouteIsSubset(e.route, r))
+      for (const r of routes.filter(p => p.isActive)) {
+        if (isRoutePartEqual(e.routeParts, r.parts))
           return true
       }
       return false
@@ -163,12 +188,13 @@ function App() {
   function actionStopServer() {
     server?.kill()
     setRaw([])
+    setRoutes([])
     setLogEntries([])
     setSelectedEntry(undefined)
   }
+
   function actionReloadApp() {
     setServerActivity(ActivityState.Bundling)
-    setLogEntries([])
     server?.stdin.write("r\r\n")
   }
 
@@ -176,12 +202,11 @@ function App() {
     <Container>
       <LeftSideBar>
         <TreeFilter
-          onRoutesChange={(active, muted) => {
-            setActivatedRoutes(active)
-            setMutedRoutes(muted)
+          onRouteUpdates={(routes) => {
+            console.log("tree update")
+            setRoutes([...routes])
           }}
-          activeRoutes={activeRoutes}
-          mutedRoutes={mutedRoutes} />
+          routes={routes} />
         <div style={{ flex: 1, height: "auto" }} />
         <RawLog>
           {raw.map(r => <RawLogEntry>{r}</RawLogEntry>)}
@@ -203,6 +228,7 @@ function App() {
               <StopIcon style={{ color: "gray" }} />
             </MenuBarButton>
           </>) : null}
+
           <div style={{ flex: 1 }} />
 
           <MenuBarButton>
@@ -210,11 +236,25 @@ function App() {
           </MenuBarButton>
 
         </MenuBar>
-        <div style={{ height: `calc(100% - ${MENU_BAR_HEIGHT}px - 1px)` }}>
+        <div style={{ height: `calc(100% - ${MENU_BAR_HEIGHT * 2}px - 1px)` }}>
           <LogEntryList
             onSelect={setSelectedEntry}
             entries={getActiveEntries()} />
         </div>
+
+        <MenuBar>
+          <MenuBarButton>
+            <MenuBarText>
+              Entries {" " + logEntries.length}
+            </MenuBarText>
+          </MenuBarButton>
+
+          <MenuBarButton>
+            <MenuBarText>
+              Routes {" " + routes.length}
+            </MenuBarText>
+          </MenuBarButton>
+        </MenuBar>
       </Content>
       <RightSideBar>
         {warning ? (
@@ -246,6 +286,11 @@ const WarningPanelCloseButton = styled.div`
   justify-content: center;
   background-color: darkorange;
 
+`
+
+const MenuBarText = styled.div`
+  color:#aaaaaa;
+  padding: 8px;
 `
 
 const WarningPanel = styled.div`

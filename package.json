@@ -1,13 +1,13 @@
 {
   "name": "log-scope-linux-app",
   "version": "3.0.0",
-  "description": "The software to easy log reading",
+  "description": "The next gen log reader",
   "main": "./dist/main.bundle.js",
   "scripts": {
     "start": "electron ./dist/main.bundle.js",
     "dev": "rimraf dist && cross-env NODE_ENV=development webpack --watch --progress --color",
     "prod": "rimraf dist && cross-env NODE_ENV=development webpack --progress --color",
-    "test": "mocha -r ts-node/register -r tsconfig-paths/register \"test/**/*.ts\"",
+    "test": "jest",
     "build:win": "electron-builder build --win --x64",
     "build:mac": "electron-builder build --mac --x64",
     "build:linux": "electron-builder build --linux"

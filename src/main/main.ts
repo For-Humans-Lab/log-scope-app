@@ -19,10 +19,8 @@ function createWindow(): void {
       webSecurity: false,
       nodeIntegration: true,
       contextIsolation: false,
-      devTools: true,
     },
   });
-  mainWindow.webContents.openDevTools()
   // and load the index.html of the app.
   mainWindow.loadURL(
     url.format({

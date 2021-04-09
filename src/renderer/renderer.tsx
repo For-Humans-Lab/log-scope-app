@@ -66,7 +66,7 @@ function App() {
 
   function patchCLI() {
     const fs = require('fs')
-    fs.copyFileSync("./static/watchMode.dat",
+    fs.copyFileSync(__dirname+"/static/watchMode.dat",
       getAppDir() + "/node_modules/@react-native-community/cli/build/commands/start/watchMode.js")
     //
   }

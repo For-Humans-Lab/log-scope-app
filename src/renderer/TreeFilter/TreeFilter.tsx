@@ -18,7 +18,7 @@ export default function TreeFilter({ routes, onRouteUpdates: onRouteUpdate }: {
     routes: EventRoute[],
     onRouteUpdates: (routes: EventRoute[]) => void,
 }) {
-    const [tree, setTree] = React.useState<any>()
+    const [tree, setTree] = React.useState<any>([])
 
     function muteAll() {
         routes.forEach(r=>r.isActive = false)

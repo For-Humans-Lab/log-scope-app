@@ -9,7 +9,7 @@ Pick a tool according to your OS:
 
 And run `npx log-scope`
 
-⚠️ **Some of a RN CLI files will be automatically patched. In other words, it slightliy changes the watch's tool behaviour in a console use** ⚠️
+⚠️ **Some of a RN CLI files will be automatically patched. In other words, it slightliy changes the watch's tool behaviour in case of console use** ⚠️
 
 ## Development
 
@@ -17,4 +17,6 @@ According to a environmental dependency of an application (RN CLI), you have to 
 
 So you can run the log scope in development mode:
 `npm run dev` for dev server and `npm run start` for app launch.
+
+Building: `npm run prod && npm run build:linux && ./scripts/bundle-linux.sh`
 

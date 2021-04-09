@@ -27,8 +27,10 @@ import StopIcon from '@material-ui/icons/Stop'
 import isRoutePartEqual from '_/utils/isRoutePartsEqual';
 import { EventRoute } from '_/model/EventRoute';
 import useRemoteState from '_/utils/useRemoteState';
+import Traceback from '_/model/Traceback';
+import TracebackPanel from './TracebackPanel';
 
-const MENU_BAR_HEIGHT = 30
+
 
 let server: ChildProcessWithoutNullStreams | undefined = undefined
 
@@ -48,7 +50,8 @@ function App() {
 
   const [raw, setRaw] = React.useState<string[]>([])
 
-  const [warning, setWarning] = React.useState<string | undefined>()
+  const [selectedTraceback, setSelectedTraceback] = React.useState<Traceback | undefined>()
+  const [tracebacks, setTracebacks] = useRemoteState<Traceback[]>([])
 
   function logRaw(...lines: string[]) {
     setRaw(raw => [...lines, ...raw])
@@ -82,7 +85,7 @@ function App() {
     }
 
     if (log.includes("Possible Unhandled Promise Rejection")) {
-      setWarning(log)
+      setTracebacks([...tracebacks, new Traceback(log)])
       return false;
     }
 
@@ -175,7 +178,6 @@ function App() {
   }
 
   function getActiveEntries() {
-    console.log("test", routes)
     return logEntries.filter(e => {
       for (const r of routes.filter(p => p.isActive)) {
         if (isRoutePartEqual(e.routeParts, r.parts))
@@ -236,11 +238,28 @@ function App() {
           </MenuBarButton>
 
         </MenuBar>
-        <div style={{ height: `calc(100% - ${MENU_BAR_HEIGHT * 2}px - 1px)` }}>
+        <div style={{ flex: 1, overflowY: "scroll" }}>
           <LogEntryList
             onSelect={setSelectedEntry}
             entries={getActiveEntries()} />
         </div>
+
+        <TracebacksList>
+          {tracebacks.map(t => (
+            <TracebackEntry onClick={(e) => {
+              setSelectedTraceback(t)
+            }}>
+              {t.id}
+              <div style={{ flex: 1 }} />
+              <div
+                style={{ cursor: "pointer" }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setTracebacks(tracebacks.filter(tr => tr.id != t.id))
+                }} >HIDE</div>
+            </TracebackEntry>
+          ))}
+        </TracebacksList>
 
         <MenuBar>
           <MenuBarButton>
@@ -255,15 +274,16 @@ function App() {
             </MenuBarText>
           </MenuBarButton>
         </MenuBar>
+
       </Content>
       <RightSideBar>
-        {warning ? (
-          <WarningPanel>
-            <WarningPanelCloseButton onClick={() => setWarning(undefined)}>
+        {selectedTraceback ? (
+          <TracebackPanelContainer>
+            <TracebackPanelCloseButton onClick={() => setSelectedTraceback(undefined)}>
               Close
-            </WarningPanelCloseButton>
-            {warning}
-          </WarningPanel>
+            </TracebackPanelCloseButton>
+            <TracebackPanel tr={selectedTraceback} />
+          </TracebackPanelContainer>
         ) : null}
 
         {selectedEntry ?
@@ -280,11 +300,13 @@ function App() {
   );
 }
 
-const WarningPanelCloseButton = styled.div`
+const MENU_BAR_HEIGHT = 30
+
+const TracebackPanelCloseButton = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: darkorange;
+  color: gray;
 
 `
 
@@ -293,13 +315,30 @@ const MenuBarText = styled.div`
   padding: 8px;
 `
 
-const WarningPanel = styled.div`
+const TracebackEntry = styled.div`
+  background-color: #b97b08;
+  padding:8px;
+  cursor: pointer;
+  display: flex; 
+  align-items: center;
+  flex-direction: row;
+  color:white;
+`
+
+
+const TracebacksList = styled.div`
+  max-height: 400px;
+  overflow-y: scroll;
+  color:white;
+`
+
+const TracebackPanelContainer = styled.div`
   position: absolute;
-  background-color: orange;
+  z-index: 5;
   height: 100%;
-  width: 300px;
   overflow-y: scroll;
   overflow-wrap: anywhere;
+  color: #444444;
 `
 
 const RawLog = styled.div`
@@ -350,8 +389,12 @@ const LeftSideBar = styled.div`
 `
 
 const Content = styled.div`
+  max-height: 100vh;
+  overflow-y:hidden;
+  display:flex;
+  flex-direction: column;
   background-color: #2e2e2e;
-  flex:1;
+  flex: 1;
 `
 
 const RightSideBar = styled.div`

@@ -24,13 +24,12 @@ import { trimEnd } from 'lodash';
 import StartIcon from '@material-ui/icons/PlayArrow';
 import ReloadIcon from '@material-ui/icons/Replay'
 import StopIcon from '@material-ui/icons/Stop'
+import ClearIcon from '@material-ui/icons/ClearAll'
 import isRoutePartEqual from '_/utils/isRoutePartsEqual';
 import { EventRoute } from '_/model/EventRoute';
 import useRemoteState from '_/utils/useRemoteState';
 import Traceback from '_/model/Traceback';
 import TracebackPanel from './TracebackPanel';
-
-
 
 let server: ChildProcessWithoutNullStreams | undefined = undefined
 
@@ -70,7 +69,6 @@ function App() {
       getAppDir() + "/node_modules/@react-native-community/cli/build/commands/start/watchMode.js")
     //
   }
-
 
   function processLogEvents(log: string) {
     if (log.includes("BUNDLE")) {
@@ -228,6 +226,11 @@ function App() {
             <MenuBarButton onClick={actionReloadApp}>
               <ReloadIcon style={{ color: "gray", fontSize: 18 }} />
             </MenuBarButton>
+
+            <MenuBarButton onClick={()=>{setLogEntries([])}}>
+              <ClearIcon style={{ color: "gray" }} />
+            </MenuBarButton>
+
             <MenuBarButton onClick={actionStopServer}>
               <StopIcon style={{ color: "gray" }} />
             </MenuBarButton>

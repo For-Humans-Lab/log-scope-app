@@ -7,7 +7,7 @@ export default function LogEntryList({ entries, onSelect }: { entries: LogEntry[
     console.log("list render")
     return (
         <Container>
-            {entries.map((x) => <LogEntryItem onSelect={() => onSelect(x)} key={x.id.toString()} entry={x} />)}
+            {entries.reverse().map((x) => <LogEntryItem onSelect={() => onSelect(x)} key={x.id.toString()} entry={x} />)}
         </Container>
     )
 }

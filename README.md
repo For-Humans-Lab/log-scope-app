@@ -3,9 +3,9 @@ The app that provides you a better tool to monitor your rn application and debug
 
 ## Installation
 Pick a tool according to your OS:
-1. `npm i log-scope-app-linux`
-2. `npm i log-scope-app-mac` (Under construction 🔨)
-3. `npm i log-scope-app-windows` (Under construction 🔨)
+1. `npm i @for-humans-lab/log-scope-linux-app`
+2. `npm i @for-humans-lab/log-scope-app-mac` (Under construction 🔨)
+3. `npm i @for-humans-lab/log-scope-app-windows` (Under construction 🔨)
 
 And run `npx log-scope`
 

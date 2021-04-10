@@ -38,7 +38,12 @@ jobs:
       - run: git push -q https://${github_ci_token}@github.com/For-Humans-Lab/log-scope-app.git master --tags
 
 workflows:
+  build_on_pr:
+    jobs:
+      - build_linux
   build_and_publish_linux:
+    when:
+       equals: [master, <<pipeline.git.branch>>]
     jobs:
       - build_linux
       - publish:

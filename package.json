@@ -13,7 +13,7 @@
     "build:linux": "electron-builder build --linux --x64 --publish never"
   },
   "bin": {
-    "log-scope": "build/linux/log-scope-linux-app"
+    "log-scope": "build/app/log-scope-app"
   },
   "build": {
     "appId": "com.forhumanslab.logscopeapp",
@@ -24,14 +24,20 @@
     ],
     "directories": {
       "app": "./dist/",
-      "output": "./out/"
+      "output": "./build/"
     },
     "mac": {
-      "target": "dmg"
+      "target": "dmg",
+      "executableName":"log-scope-app"
     },
     "win": {
       "target": "nsis",
-      "asar": true
+      "asar": true,
+      "executableName":"log-scope-app"
+    },
+    "linux":{
+      "target":"dir",
+      "executableName":"log-scope-app"
     },
     "nsis": {
       "oneClick": false,

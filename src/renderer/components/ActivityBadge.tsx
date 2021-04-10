@@ -13,7 +13,7 @@ export default function ActivityBadge({ activity }: { activity: ActivityState })
     return (
         <>
             <Badge color={activity == ActivityState.Idle ? "#41A9AF" : "gray"} />
-            <Badge color={activity == ActivityState.Bundling ? "#AE8BE5" : "gray"}  />
+            <Badge color={activity == ActivityState.Bundling ? "#e9a348" : "gray"}  />
             <Badge color={activity == ActivityState.Running ? "#DD6BDF" : "gray"}  />
         </>
     )

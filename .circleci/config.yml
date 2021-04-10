@@ -28,7 +28,7 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      - run: npm config set -- '//gitlab.example.com/api/v4/packages/npm/:_authToken' "${npm_key}"
+      - run: npm config set -- '//registry.npmjs.org/:_authToken=${npm_key}'
       - run: npm publish --access public
         
 workflows:

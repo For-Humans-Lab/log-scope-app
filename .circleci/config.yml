@@ -39,14 +39,15 @@ jobs:
 
 workflows:
   build_and_publish_linux:
-    when:
-      and:
-        - equal: [master, <<pipeline.git.branch>>]
-        - equal: ["", <<pipeline.git.tag>>]
-           
     jobs:
-      - build_linux
+      - build_linux:
+          filters:
+            tags:
+              ignore: /.+/
       - publish:
+          filters:
+              tags:
+                ignore: /.+/
           requires:
             - build_linux
           context:

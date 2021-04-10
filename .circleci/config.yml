@@ -32,7 +32,9 @@ jobs:
       - run: npm config set -- '//registry.npmjs.org/:_authToken=${npm_key}'
       - run: git config user.email "circleci@gorhumanslab.com"
       - run: git config user.name "Circle CI builder"
-      - run: npm version patch
+      - run: npm version patch --no-git-tag-version
+      - run: git commit -m "version increase"
+      - run: git push
       - run: npm publish --access public
         
 workflows:

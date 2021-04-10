@@ -30,7 +30,9 @@ jobs:
       - attach_workspace:
           at: .
       - run: npm config set -- '//registry.npmjs.org/:_authToken=${npm_key}'
-      - run: npm version patch --no-git-tag-version
+      - run: git config user.email "circleci@gorhumanslab.com"
+      - run: git config user.name "Circle CI builder"
+      - run: npm version patch
       - run: npm publish --access public
         
 workflows:

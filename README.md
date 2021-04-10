@@ -7,7 +7,7 @@ The app that provides you a better tool to monitor your rn application and debug
 Pick a tool according to your OS:
 1. `npm i @for-humans-lab/log-scope-linux-app`
 2. <strike>`npm i @for-humans-lab/log-scope-mac-app`</strike> (Under construction 🔨)
-3. <strike>`npm i @for-humans-lab/log-scope-win-app`</strike> (Under construction 🔨)
+3. `npm i @for-humans-lab/log-scope-win-app`
 
 ⚠️ **Some of a RN CLI files will be automatically patched. In other words, it slightliy changes the watch's tool behaviour in case of console use** ⚠️
 

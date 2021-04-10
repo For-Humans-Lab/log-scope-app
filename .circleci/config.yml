@@ -1,0 +1,16 @@
+version: 2.1
+orbs:
+  node: circleci/node@3.0.0
+jobs:
+  build: 
+    docker:       
+      - image: circleci/node        
+    steps:       
+      - run: npm i 
+      - run: npm run prod
+      - run: npm run build:linux
+
+workflows:
+  build_and_publish_linux:
+    jobs:
+      - build

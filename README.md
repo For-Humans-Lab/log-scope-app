@@ -50,6 +50,7 @@ Next routes
 ["App", "Cart"]
 ```
 have the following **filtering tree**
+
 ![tree](./docs/assets/tree.png)
 
 All routes are matched per part.

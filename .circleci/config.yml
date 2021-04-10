@@ -32,11 +32,13 @@ jobs:
       - run: npm config set -- '//registry.npmjs.org/:_authToken=${npm_key}'
       - run: git config user.email "circleci@gorhumanslab.com"
       - run: git config user.name "Circle CI builder"
+      - run: git config credential.helper 'cache --timeout=120'
       - run: npm version patch --no-git-tag-version
+      - run: git add .
       - run: git commit -m "version increase"
-      - run: git push
       - run: npm publish --access public
-        
+      - run: git push -q https://${github_ci_token}@github.com/For-Humans-Lab/log-scope-app.git master
+
 workflows:
   build_and_publish_linux:
     when:

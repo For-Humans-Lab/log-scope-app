@@ -5,7 +5,8 @@ jobs:
   build: 
     docker:       
       - image: circleci/node        
-    steps:       
+    steps:   
+      - checkout
       - run: npm i 
       - run: npm run prod
       - run: npm run build:linux

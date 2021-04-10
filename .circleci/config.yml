@@ -16,7 +16,7 @@ jobs:
           paths:
             - node_modules
       - run: npm run prod
-      - run: npm version patch
+
       - run: npm run build:linux
       - run: cp -r ./build/linux-unpacked/ ./build/app && rm -rf ./build/linux-unpacked/
       - persist_to_workspace:
@@ -30,6 +30,7 @@ jobs:
       - attach_workspace:
           at: .
       - run: npm config set -- '//registry.npmjs.org/:_authToken=${npm_key}'
+      - run: npm version patch --no-git-tag-version
       - run: npm publish --access public
         
 workflows:

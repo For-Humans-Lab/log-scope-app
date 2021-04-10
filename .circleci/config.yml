@@ -42,7 +42,8 @@ workflows:
     when:
       and:
         - equal: [master, <<pipeline.git.branch>>]
-        - <<pipeline.git.tag>>
+        - not:
+           <<pipeline.git.tag>>
     jobs:
       - build_linux
       - publish:

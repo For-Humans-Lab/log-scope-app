@@ -2,7 +2,7 @@ import { LogEntry } from "_/model/LogEntry";
 
 
 export function extractLogEntryFromRawText(data: string): LogEntry | undefined {
-  const pattern = /\([(?<time>.+)\])?\s+LOG\s+(?<route>(\w|\s|\>)+)-\>(?<message>[^|]+)\|(?<object>.+)$/gm
+  const pattern = /(\[(?<time>.+)\])?\s+LOG\s+(?<route>(\w|\s|\>)+)-\>(?<message>[^|]+)\|(?<object>.+)$/gm
   const match = pattern.exec(data.trim())
 
   if (!match?.groups!["route"])

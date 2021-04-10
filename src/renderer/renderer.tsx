@@ -227,7 +227,6 @@ function App() {
               <ReloadIcon style={{ color: "gray", fontSize: 18 }} />
             </MenuBarButton>
 
-
             <MenuBarButton onClick={()=>{setLogEntries([])}}>
               <ClearIcon style={{ color: "gray" }} />
             </MenuBarButton>

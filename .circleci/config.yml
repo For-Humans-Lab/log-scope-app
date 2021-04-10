@@ -43,11 +43,11 @@ workflows:
       - build_linux:
           filters:
             tags:
-              ignore: /.+/
+              only: ""
       - publish:
           filters:
               tags:
-                ignore: /.+/
+                only: ""
           requires:
             - build_linux
           context:

@@ -3,7 +3,7 @@ orbs:
   node: circleci/node@3.0.0
 jobs:
   build_linux: 
-    docker:       
+    docker:
       - image: circleci/node        
     steps:   
       - checkout
@@ -16,6 +16,7 @@ jobs:
           paths:
             - node_modules
       - run: npm run prod
+      - run: npm version patch
       - run: npm run build:linux
       - run: cp -r ./build/linux-unpacked/ ./build/app && rm -rf ./build/linux-unpacked/
       - persist_to_workspace:
@@ -33,6 +34,9 @@ jobs:
         
 workflows:
   build_and_publish_linux:
+    when:
+      and:
+        - equal: [master, <<pipeline.git.branch>>]
     jobs:
       - build_linux
       - publish:

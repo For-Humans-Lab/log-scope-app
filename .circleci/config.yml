@@ -2,16 +2,46 @@ version: 2.1
 orbs:
   node: circleci/node@3.0.0
 jobs:
-  build: 
-    docker:       
+  build_linux: 
+    docker:
       - image: circleci/node        
     steps:   
       - checkout
+      - restore_cache:
+          keys:
+            - deps-{{ checksum "package-lock.json" }}
       - run: npm i 
+      - save_cache:
+          key: deps-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
       - run: npm run prod
-      - run: npm run build:linux
 
+      - run: npm run build:linux
+      - run: cp -r ./build/linux-unpacked/ ./build/app && rm -rf ./build/linux-unpacked/
+      - persist_to_workspace:
+          root: .
+          paths:
+            - '*'
+  publish:
+    docker:
+      - image: circleci/node
+    steps:
+      - attach_workspace:
+          at: .
+      - run: npm config set -- '//registry.npmjs.org/:_authToken=${npm_key}'
+      - run: npm version patch --no-git-tag-version
+      - run: npm publish --access public
+        
 workflows:
   build_and_publish_linux:
+    when:
+      and:
+        - equal: [master, <<pipeline.git.branch>>]
     jobs:
-      - build
+      - build_linux
+      - publish:
+          requires:
+            - build_linux
+          context:
+            main

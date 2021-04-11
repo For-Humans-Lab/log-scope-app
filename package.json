@@ -1,6 +1,6 @@
 {
   "name": "@for-humans-lab/log-scope-linux-app",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "The next gen log reader",
   "main": "./dist/main.bundle.js",
   "scripts": {

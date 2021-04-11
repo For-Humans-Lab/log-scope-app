@@ -53,7 +53,7 @@ function App() {
   const [tracebacks, setTracebacks] = useRemoteState<Traceback[]>([])
 
   function logRaw(...lines: string[]) {
-    setRaw(raw => [...lines, ...raw])
+    setRaw(raw => raw.length<50? [...lines, ...raw]:[...lines])
   }
 
   React.useEffect(() => {
